@@ -1,0 +1,45 @@
+<script type="text/javascript" charset="utf-8">
+    $(function () {
+
+    });
+</script>
+<div id="userPwdForm_div">
+	<div class="demo-info" align="center">
+		<div class="demo-tip icon-tip"></div>
+		<div align="left">
+			*密码中不能包含用户名，不能使用最近8次使用过的密码<br>
+		    *最小长度为6位，至少包含1个数字和1个字母，且含3个不相同的字符<br>
+	    </div>
+	</div>
+	<div style="margin: 2px 0"></div>
+    <form id="userPwdForm_form" method="post" class="form">
+        <table id="userPwdForm_table" class="table" style="width: 100%;">
+            <tbody>
+            <tr>
+                <th>用户旧密码：</th>
+                <td><input id="adminPwd" name="adminPwd" type="password"
+                           class="easyui-validatebox"
+                           data-options="required:true, validType:['spaceMatch[0]']"><span
+                        style="color: red">*</span></td>
+                <td colspan="2"><span style="color: red">注意：填写当前使用中密码！</span></td>
+            </tr>
+            <tr>
+                <th>用户新密码：</th>
+                <td><input id="userPwd" name="userPwd" type="password"
+                           class="easyui-validatebox"
+                           data-options="required:true, validType:['length[6,12]','spaceMatch[0]','notEquals[\'#adminPwd\']']"><span
+                        style="color: red">*</span></td>
+                <td colspan="2"><span id="userPwdForm_changePwd_info"></span></td>
+            </tr>
+            <tr>
+                <th>重复新密码：</th>
+                <td><input id="userPwd_sub" name="userPwdSub" type="password"
+                           class="easyui-validatebox"
+                           data-options="required:true, validType:['length[6,12]','spaceMatch[0]','equals[\'#userPwd\']']"><span
+                        style="color: red">*</span></td>
+                <td colspan="2"><span id="userPwdForm_changePwd_sub_info"></span></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>

@@ -1,0 +1,85 @@
+<script type="text/javascript" charset="utf-8">
+    $(function () {
+
+    });
+</script>
+<div id="userInfoForm_div" align="center">
+    <form id="userInfoForm_form" method="post" class="form">
+        <table id="userInfoForm_table" class="table" style="width: 100%;">
+            <tbody>
+            <tr>
+                <th><span style="color: red">*</span>用户编号：</th>
+                <td><input id="userId" name="userId" type="text"
+                           class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'用户编号为必填项！',validType:['spaceMatch[0]']">&nbsp;&nbsp;
+                    <a id="userInfoForm_checkUserId_btn" href="javascript:void(0);"
+                       class="easyui-linkbutton" data-options="iconCls:'icon-check'">检测</a></td>
+                <td colspan="2"><span id="userInfoForm_checkUserId_span"></span></td>
+            </tr>
+            <tr>
+                <th><span style="color: red">*</span>登录名：</th>
+                <td><input id="loginName" name="loginName" type="text"
+                           class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'登录名为必填项！',validType:['spaceMatch[0]']">&nbsp;&nbsp;
+                    <a id="userInfoForm_checkLoginName_btn" href="javascript:void(0);"
+                       class="easyui-linkbutton" data-options="iconCls:'icon-check'">检测</a></td>
+                <td colspan="2"><span id="userInfoForm_checkLoginName_span"></span></td>
+            </tr>
+            <tr>
+                <th><span style="color: red">*</span>用户姓名：</th>
+                <td><input name="userName"
+                           class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'用户姓名为必填项！', validType:['spaceMatch[0]']"></td>
+                <th>用户状态：</th>
+                <td><select id="enable" name="enable"
+                            class="easyui-combobox combobox-f combo-f"
+                            data-options="panelHeight:'auto',editable:false"
+                            style="width: 155px; display: none;">
+                    <option value="0">停用</option>
+                    <option value="1">启用</option>
+                </select></td>
+            </tr>
+            <tr>
+                <th><span style="color: red">*</span>机构代码：</th>
+                <td><input name="orgNo" readonly="readonly"
+                           class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'机构代码为必填项！', validType:['spaceMatch[0]']">&nbsp;&nbsp;
+                    <a id="userInfoForm_selectOrg_btn" href="javascript:void(0);"
+                    	class="easyui-linkbutton" data-options="iconCls:'icon-org-add'">机构</a></td>
+                <th>机构名称：</th>
+                <td><input name="orgName" readonly="readonly"></td>
+            </tr>
+            <tr>
+                <th><span style="color: red">*</span>启用日期：</th>
+                <td><input id="enableDate" name="enableDate" type="text" style="width:155px;"
+                           class="Wdate easyui-validatebox" data-options="required:true, missingMessage:'启用日期为必填项！'"
+                           onclick="WdatePicker({dateFmt:'yyyyMMdd',maxDate:'#F{$dp.$D(\'invalidDate\')}'})"/></td>
+                <th><span style="color: red">*</span>失效日期：</th>
+                <td><input id="invalidDate" name="invalidDate" type="text" style="width:155px;"
+                           class="Wdate easyui-validatebox" data-options="required:true, missingMessage:'失效日期为必填项！'"
+                           onclick="WdatePicker({dateFmt:'yyyyMMdd',minDate:'#F{$dp.$D(\'enableDate\')}'})"/></td>
+            </tr>
+            <tr>
+                <th>手机号码：</th>
+                <td><input name="phone" class="easyui-validatebox"
+                           data-options="validType:'lengthMatch[11]'"></td>
+                <th>工作邮箱：</th>
+                <td><input name="email" class="easyui-validatebox"
+                           data-options="validType:['email','length[0,20]']"></td>
+            </tr>
+            
+            <tr>
+                <th>证书DN：</th>
+                <td><input name="certDn" class="easyui-validatebox"
+                           data-options="validType:'length[0,200]'"></td>
+            </tr>
+            <tr>
+                <td><input name="" type="hidden"></td>
+                <td><input name="" type="hidden"></td>
+                <td><input name="" type="hidden"></td>
+                <td><input name="" type="hidden"></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>

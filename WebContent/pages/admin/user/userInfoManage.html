@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html style="width:100%;heighgt:100%;">
+<head>
+<meta charset="UTF-8">
+<title>用户信息管理</title>
+<script src="../../../js/commonIframe.js"></script>
+<script type="text/javascript">
+var eUserInfoDatagrid;
+var eUserInfoPagination;
+var eUserInfoAddDialog;
+var eUserInfoUpdateDialog;
+var eUserRoleGrantDialog;
+var eUserPwdChangeDialog;
+var eUserPwdChangeDatagrid;
+var eUserInfoOrgDialog;
+var dialogHeight = 270;
+var dialogWidth = 650;
+
+$(document).on('click', '#userInfoForm_selectOrg_btn', function() {
+	eUserInfoOrgDialog = extJQ.dialog({
+	        title: '用户机构编辑',
+	        href: 'userOrgForm.html',
+	        width: 500,
+	        height: 400,
+	        buttons: [
+	            {
+	                text: '保存',
+	                iconCls: 'icon-add',
+	                handler: function () {
+	                	var oOrgInfo = eUserOrgDatagrid.datagrid('getSelections');
+	                	if(oOrgInfo.length <1) {
+	                		 $.messager.alert("提示", "请选择需要设置的机构记录！");
+	                         return;
+	                	}
+	                	$("#userInfoForm_form input[name='orgNo']").val(oOrgInfo[0].orgNo);
+	                	$("#userInfoForm_form input[name='orgName']").val(oOrgInfo[0].orgName);
+	                	eUserInfoOrgDialog.dialog('close');
+	                }
+	            },
+	            {
+	                text: '关闭',
+	                iconCls: 'icon-cancel',
+	                handler: function () {
+	                	eUserInfoOrgDialog.dialog('close');
+	                }
+	            }
+	        ],
+	        onLoad: function () {
+	        }
+	    });
+});
+
+var fAdd = function () {
+    eUserInfoAddDialog = extJQ.dialog({
+        title: '新增用户信息',
+        href: 'userInfoForm.html',
+        width: dialogWidth,
+        height: dialogHeight,
+        buttons: [
+            {
+                text: '保存',
+                iconCls: 'icon-add',
+                handler: function () {
+                    var $CheckLoginNameSpan = $('#userInfoForm_checkLoginName_span');
+                    var $CheckUserIdSpan = $('#userInfoForm_checkUserId_span');
+                    var $userInfoFormForm = $("#userInfoForm_form");
+                    var oIsValid/*Form内验证元素的状态*/ = $userInfoFormForm.form('validate');
+                    if (!oIsValid) {
+                        $.messager.alert("提示", "校验未通过，请检查输入项！");
+                        return;
+                    }
+                    var oCheckFlag = $CheckUserIdSpan.attr("checkFlag");
+                    if (oCheckFlag != "true") {
+                        $.messager.alert("提示", "请先进行用户编号合法验证！");
+                        return;
+                    }
+                    oCheckFlag = $CheckLoginNameSpan.attr("checkFlag");
+                    if (oCheckFlag != "true") {
+                        $.messager.alert("提示", "请先进行用户登入名合法验证！");
+                        return;
+                    }
+                    var oAddCondition/*序列化表单数据*/ = extUtil.serializeObject($userInfoFormForm.form());
+                    utils.ajaxPost(staticParam.action_reqPath_main, "insertUserInfo", oAddCondition, function (o) {
+                    	eUserInfoDatagrid.datagrid("insertRow", {
+        					index : 0,
+        					row : o.userInfo
+        				});
+                    	extJQ.removeDatagridDefaultView('userInfoManage_datagrid');
+                    	eUserInfoAddDialog.dialog('close');
+                    });
+                }
+            },
+            {
+                text: '关闭',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    eUserInfoAddDialog.dialog('close');
+                }
+            }
+        ],
+        onLoad: function () {
+            var $CheckLoginNameSpan = $('#userInfoForm_checkLoginName_span');
+            var $CheckLoginNameBtn = $('#userInfoForm_checkLoginName_btn');
+            $CheckLoginNameSpan.attr("checkFlag", false);
+            $CheckLoginNameBtn.bind('click', function () {
+                var $loginName = $("#userInfoForm_table tr td").find("input[name='loginName']");
+                var sLoginName = $loginName.val().replace(/\s+/g, "");
+                if (sLoginName) {
+                    $CheckLoginNameBtn.linkbutton("disable"); // 禁用按钮
+                    $CheckLoginNameSpan.html("正在检测中……");
+                    var oReqData/*请求数据*/ = {
+                        loginName: sLoginName
+                    };
+                    utils.ajaxPost(staticParam.action_reqPath_main, "getUserInfoByName", oReqData,
+                            function (o) {
+                                $CheckLoginNameBtn.linkbutton("enable");
+                                $CheckLoginNameSpan.attr(
+                                        "checkFlag", true).html(
+                                        "登入名可用！");
+                            },
+                            function (o) {
+                                $CheckLoginNameBtn.linkbutton("enable");
+                                $CheckLoginNameSpan.attr(
+                                        "checkFlag", false).html(
+                                        "登入名已占用，请更换！");
+                            });
+                } else {
+                    $CheckLoginNameSpan.html("请输入正确的登入名！");
+                    $loginName.val('');
+                }
+            });
+            // 用来检测文本域文字输入状态 ,当状态改变的时候执行的函数
+            extUtil.watchElementById("loginName", function () {
+                $CheckLoginNameSpan.attr("checkFlag", false).html("请校验用户登入名！");
+            });
+
+            var $CheckUserIdSpan = $('#userInfoForm_checkUserId_span');
+            var $CheckUserIdBtn = $('#userInfoForm_checkUserId_btn');
+            $CheckUserIdSpan.attr("checkFlag", false);
+            $CheckUserIdBtn.bind('click', function () {
+                var $UserId = $("#userInfoForm_table tr td").find("input[name='userId']");
+                var sUserId = $UserId.val().replace(/\s+/g, "");
+                if (sUserId) {
+                    $CheckUserIdBtn.linkbutton("disable"); // 禁用按钮
+                    $CheckUserIdSpan.html("正在检测中……");
+                    var oReqData/*请求数据*/ = {
+                        userId: sUserId
+                    };
+                    utils.ajaxPost(staticParam.action_reqPath_main, "getUserInfoById", oReqData,
+                            function (o) {
+                                $CheckUserIdBtn.linkbutton("enable");
+                                $CheckUserIdSpan.attr(
+                                        "checkFlag", true).html(
+                                        "用户编号可用！");
+                            },
+                            function (o) {
+                                $CheckUserIdBtn.linkbutton("enable");
+                                $CheckUserIdSpan.attr(
+                                        "checkFlag", false).html(
+                                        "用户编号已占用，请更换！");
+                            });
+                } else {
+                    $CheckUserIdSpan.html("请输入正确的用户编号！");
+                    $UserId.val('');
+                }
+            });
+            // 用来检测文本域文字输入状态 ,当状态改变的时候执行的函数
+            extUtil.watchElementById("userId", function () {
+                $CheckUserIdSpan.attr("checkFlag", false).html("请校验用户编号！");
+            });
+        }
+    });
+};
+
+var fEdit = function () {
+    var aRows = eUserInfoDatagrid.datagrid('getSelections');
+    if (aRows.length != 1) {
+        extJQ.messagerAlert('提示', '请勾选一个要编辑的用户记录！', 'error');
+        return;
+    } 
+    $('#userEdit_checkUserId_span').attr("checkFlag", false);
+    $('#userEdit_checkLoginName_span').attr("checkFlag", false);
+
+    eUserInfoUpdateDialog = extJQ.dialog({
+        title: '更新用户信息',
+        href: 'userInfoForm.html',
+        width: dialogWidth,
+        height: dialogHeight,
+        buttons: [
+            {
+                text: '保存',
+                iconCls: 'icon-add',
+                handler: function () {
+                    var $userInfoFormForm = $("#userInfoForm_form");
+                    var oIsValid/*Form内验证元素的状态*/ = $userInfoFormForm.form('validate');
+                    if (!oIsValid) {
+                        $.messager.alert("提示", "校验未通过，请检查输入项！");
+                        return;
+                    }
+                    var $CheckLoginNameSpan = $('#userInfoForm_checkLoginName_span');
+                    oCheckFlag = $CheckLoginNameSpan.attr("checkFlag");
+                    if (oCheckFlag != "true") {
+                        $.messager.alert("提示", "请先进行用户登入名合法验证！");
+                        return;
+                    }
+                    var oUpdateCondition/*序列化表单数据*/ = extUtil.serializeObject($userInfoFormForm.form());
+                    utils.ajaxPost(staticParam.action_reqPath_main, "editUserInfo", oUpdateCondition, function (o) {
+       					var nIndex = eUserInfoDatagrid.datagrid('getRowIndex', aRows[0]);
+                    	eUserInfoDatagrid.datagrid('updateRow', {
+       						index : nIndex,
+       						row : o.userInfo
+       					});
+                    	eUserInfoUpdateDialog.dialog('close');
+                    });
+
+                }
+            },
+            {
+                text: '关闭',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    eUserInfoUpdateDialog.dialog('close');
+                }
+            }
+        ],
+        onLoad: function () { // 动态加载，数据填充
+
+            $('#userInfoForm_form').form('load', aRows[0]);
+            var sOrginalUserId/* 初始状态数据 */ = aRows[0].userId;
+            var sOrginalLoginName/* 初始状态数据 */ = aRows[0].loginName;
+
+            var $CheckLoginNameSpan = $('#userInfoForm_checkLoginName_span');
+            var $CheckLoginNameBtn = $('#userInfoForm_checkLoginName_btn');
+            $CheckLoginNameSpan.attr("checkFlag", true);
+            var $LoginName = $("#userInfoForm_table tr td").find("input[name='loginName']");
+            $CheckLoginNameBtn.bind('click', function () {
+                var sLoginName = $LoginName.val();
+                if ($.trim(sLoginName)) {
+                    $CheckLoginNameBtn.linkbutton("disable"); // 禁用按钮
+                    $CheckLoginNameSpan.html("正在检测中……");
+                    var oReqData/*请求数据*/ = {
+                        loginName: sLoginName
+                    };
+                    utils.ajaxPost(staticParam.action_reqPath_main, "getUserInfoByName", oReqData,
+                            function (o) {
+                                $CheckLoginNameBtn.linkbutton("enable");
+                                $CheckLoginNameSpan.attr(
+                                        "checkFlag", true).html(
+                                        "登入名可用！");
+                            },
+                            function (o) {
+                                $CheckLoginNameBtn.linkbutton("enable");
+                                $CheckLoginNameSpan.attr(
+                                        "checkFlag", false).html(
+                                        "登入名已占用，请更换！");
+                            });
+                } else {
+                    $CheckLoginNameSpan.html("请输入正确的用户登录名！");
+                    $LoginName.val('');
+                }
+            });
+            extUtil.watchElementById("loginName", function () {
+                if (sOrginalLoginName) {
+                    if ($LoginName.val() == sOrginalLoginName) {
+                        $CheckLoginNameSpan.attr("checkFlag", true).html("用户登录名未变更。");
+                        return;
+                    }
+                }
+                $CheckLoginNameSpan.attr("checkFlag", false).html("请校验用户登录名！");
+            });
+
+            var $CheckUserIdBtn = $('#userInfoForm_checkUserId_btn');
+            $CheckUserIdBtn.linkbutton("disable");
+            var $UserId = $("#userInfoForm_table tr td").find("input[name='userId']");
+            $UserId.attr("readonly","readonly");
+
+            // TODO 考虑修改自身状态的情况
+
+        }
+    });
+};
+
+var fRemove = function () {
+    // TODO 需要考虑删除自身的情况
+    var oRows = eUserInfoDatagrid.datagrid('getSelections');
+    var aUserIds = [];
+    if (oRows.length > 0) {
+        extJQ.messagerConfirm('询问', '您确定要禁用所选记录？', function (r) {
+            if (r) {
+                for (var i = 0; i < oRows.length; i++) {
+                    aUserIds.push(oRows[i].userId);// 保存到ids数组中
+                }
+                var oReqData = {
+                    userIds: aUserIds.join(',')
+                }
+                utils.ajaxPost(staticParam.action_reqPath_main, "removeUserInfoByIds", oReqData, 
+                		function (o) {
+                            // 不走后台请求，进行界面移除
+                            for (var i in oRows) {
+                                var nIndex = eUserInfoDatagrid.datagrid('getRowIndex', oRows[i]);
+//                              eUserInfoDatagrid.datagrid('deleteRow', nIndex);
+                                eUserInfoDatagrid.datagrid('updateRow',{
+									index: nIndex,
+									row: {
+										enable: staticParam.flag_false
+									}
+								});
+                            }
+                            // 重新请求数据 = 刷新
+                            // fSearch();
+                        });
+            }
+        });
+    } else {
+        extJQ.messagerAlert('提示', '请勾选要删除的记录！', 'error');
+    }
+};
+
+var fGrantRole = function () {
+	var aRows = eUserInfoDatagrid.datagrid('getSelections');
+    if (aRows.length < 1) {
+        extJQ.messagerAlert('提示', '请勾选要编辑用户角色的用户记录！', 'error');
+        return;
+    } else if (aRows.length > 1) {
+        extJQ.messagerAlert('提示', '不可同时编辑多条用户角色记录！', 'error');
+        return;
+    }
+	var sUserId = aRows[0].userId;
+    eUserRoleGrantDialog = extJQ.dialog({
+        title: '用户角色信息',
+        href: 'userRoleGrant.html',
+        width: 630,
+        height: 350,
+        buttons: [
+            {
+                text: '保存',
+                iconCls: 'icon-add',
+                handler: function () {
+                	var oUserRoleRows = eUserRoleGrantSubDatagrid.datagrid("getRows");
+                	var aRoleCodes = [];
+                	for (var i = 0; i < oUserRoleRows.length; i++) {
+                		aRoleCodes.push(oUserRoleRows[i].roleCode);// 保存到ids数组中
+                    }
+                	var oReqData = {
+                		userId : sUserId,
+                		roleCodes : aRoleCodes.join(",")
+                	};
+                	utils.ajaxPost(staticParam.action_reqPath_main,
+                            "insertUserRoleBind", oReqData, function (o) {
+                				// TODO
+                            	eUserRoleGrantDialog.dialog('close');
+                            });
+                }
+            },
+            {
+                text: '关闭',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                	eUserRoleGrantDialog.dialog('close');
+                }
+            }
+        ],
+        onLoad: function () {
+        	$('#userRoleGarant_sub_toolbar_form').form('load', aRows[0]);
+        	utils.ajaxPost(staticParam.action_reqPath_main,
+                    "getRoleList", "", function (o) {
+        				eUserRoleGrantDatagrid.datagrid('uncheckAll');
+        				eUserRoleGrantDatagrid.datagrid('loadData', o.jsonData); // 加载Datagrid数据
+        				var oReqData = {
+                        		userId : sUserId
+                        	};
+        				utils.ajaxPost(staticParam.action_reqPath_main,
+        	                    "getRoleListByUserId", oReqData, function (o) {
+        	        				eUserRoleGrantSubDatagrid.datagrid('uncheckAll');
+        	        				eUserRoleGrantSubDatagrid.datagrid('loadData', o.jsonData); // 加载Datagrid数据
+        	                    });
+                    });
+        	
+        }
+    });
+};
+
+var fChangePwd = function () {
+	var aRows = eUserInfoDatagrid.datagrid('getSelections');
+    if (aRows.length < 1) {
+        extJQ.messagerAlert('提示', '请勾选至少一个需要编辑的用户记录！', 'error');
+        return;
+    }
+    eUserPwdChangeDialog = extJQ.dialog({
+        title: '用户密码信息修改',
+        href: 'userInfoPwdForm.html',
+        width: 600,
+        height: 400,
+        buttons: [
+            {
+                text: '保存',
+                iconCls: 'icon-add',
+                handler: function () {
+                	var isValid = $("#userInfoPwdForm_form").form('validate');
+					if (!isValid) {
+						$.messager.alert("提示", "校验未通过，请检查输入项！");
+						return;
+					}
+					if (parent.loginInfo.userInfo == null) {
+						$.messager.alert("提示", "当前用户信息不存在，请重新登入后再执行本操作！");
+						return;
+					}
+					extJQ.messagerConfirm("提示", "是否确认变更用户密码！操作将不可逆转！", function(r) {
+						if (r) {
+		                	var oUserInfoRows = eUserPwdChangeDatagrid.datagrid("getRows");
+		                	var aUserIds = [];
+		                	for (var i = 0; i < oUserInfoRows.length; i++) {
+		                		aUserIds.push(oUserInfoRows[i].userId);// 保存到ids数组中
+		                    }
+		                	var updatePwdCondition = extUtil.serializeObject($('#userInfoPwdForm_form').form());
+							updatePwdCondition.userId = parent.loginInfo.userInfo.userId;
+							updatePwdCondition.userIds = aUserIds.join(",");
+		                	utils.ajaxPost(staticParam.action_reqPath_main, "updateUserPwdByAdmin", updatePwdCondition, 
+		                			function (o) {
+		                            	eUserPwdChangeDialog.dialog('close');
+		                            });
+	                	}
+                });}
+            },
+            {
+                text: '关闭',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                	eUserPwdChangeDialog.dialog('close');
+                }
+            }
+        ],
+        onLoad: function () {
+        	eUserPwdChangeDatagrid = drawPlugin.userInfoListSubDatagrid('userInfoPwdForm_userInfo_table');
+        	eUserPwdChangeDatagrid.datagrid('loadData', aRows); // 加载Datagrid数据
+        }
+    });
+};
+
+
+// 搜索用户列表数据
+var fSearch = function () {
+    var aSearchParam = fCollectSearchCon(); // 搜集查询条件
+    eUserInfoDatagrid.datagrid('uncheckAll');
+    var pageNumber = eUserInfoPagination.pagination('options').pageNumber;
+    var pageSize = eUserInfoPagination.pagination('options').pageSize;
+    var data = {
+        pageGrid: utils.createPageGrid(aSearchParam, pageNumber, pageSize)
+    };
+    utils.ajaxPost(staticParam.action_reqPath_main, "getUserInfoList",
+            data.pageGrid, function (o) {
+                eUserInfoDatagrid.datagrid('uncheckAll');
+                eUserInfoDatagrid.datagrid('loadData', o.jsonData.rows); // 加载Datagrid数据
+                eUserInfoPagination.pagination('refresh', {
+                    total: o.jsonData.total
+                });
+            });
+}
+
+var fCleanSearch = function () {
+    $('#userInfoManage_toolbar input').val('');// 清空文本框
+    eUserInfoPagination.pagination('refresh', {
+        total: 0,
+        pageNumber: 1
+    });
+    fSearch(); //TODO 有问题：第二页再查询存在的
+}
+// 获取搜素条件
+var fCollectSearchCon = function () {
+    var aSearchCondition = extUtil.serializeObject($('#userInfoManage_toolbar_searchForm'));
+    // 循环searchCondition，若内key值为“”则置为null
+    for (var i in aSearchCondition) {
+        if (aSearchCondition[i] == "") {
+            aSearchCondition[i] = null;
+        }
+    }
+    var bSearchByDim/* 模糊查询标志 */ = $("#userInfoManage_search_by_dim").prop("checked");
+    if (bSearchByDim) {
+        aSearchCondition.userName = null;
+        aSearchCondition.userNameLike = $('#userManage_toolbar_userName').val();
+    }
+    return aSearchCondition;
+}
+
+$(function () {
+    var $UserInfoDatagrid = $('#userInfoManage_datagrid');
+    var $UserInfoPagination = $('#userInfoManage_pagination');
+    // sUrl = extUtil.getProjectName()  + '/demo/ajax/demostruts.action?_sid=listUserInfo';
+    eUserInfoDatagrid = drawPlugin.userInfoListDatagrid('userInfoManage_datagrid','userInfoManage_toolbar');
+    eUserInfoPagination = $UserInfoPagination.pagination(
+            {
+                pageList: [ 10, 50, 100, 300, 500 ],
+                onSelectPage: function (pageNumber, pageSize) {
+                    fSearch();
+                }
+            }).pagination('refresh', {
+                total: 0,
+                pageNumber: 1
+            });
+
+});
+</script>
+</head>
+<body id="userInfoManage_layout_body" class="easyui-layout" data-options="fit:true,border:false" style="width:100%;heighgt:100%;">
+
+<div id="userInfoManage_toolbar" style="display: none;">
+    <table>
+        <tr>
+            <td>
+                <form id="userInfoManage_toolbar_searchForm">
+                    <table>
+                        <tr>
+                            <td>登录名：</td>
+                            <td><input name="loginName" style="width: 80px;"/></td>
+                            <td>机构编号：</td>
+                            <td><input name="orgNo" style="width: 80px;"/></td>
+                            <td>机构名：</td>
+                            <td><input name="orgName" style="width: 80px;"/></td>
+                            <td>
+                                <a id="userInfoManage_toolbar_search" href="javascript:void(0);"
+                                   class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true"
+                                   onclick="fSearch();">查询</a>
+
+                                <div class="datagrid-btn-separator"></div>
+                                <a id="userInfoManage_toolbar_cleanSearch" href="javascript:void(0);"
+                                   class="easyui-linkbutton" data-options="iconCls:'icon-reload',plain:true"
+                                   onclick="fCleanSearch();">重置查询</a>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <td><a id="userInfoManage_toolbar_addUser" href="javascript:void(0);" class="easyui-linkbutton"
+                               data-options="iconCls:'icon-user-add',plain:true" onclick="fAdd();">添加</a></td>
+                        <td>
+                            <div class="datagrid-btn-separator"></div>
+                        </td>
+                        <td><a id="userInfoManage_toolbar_editUser" href="javascript:void(0);" class="easyui-linkbutton"
+                               data-options="iconCls:'icon-user-edit',plain:true" onclick="fEdit();">编辑</a></td>
+                        <td>
+                            <div class="datagrid-btn-separator"></div>
+                        </td>
+                        <td><a id="userInfoManage_toolbar_grantRole" href="javascript:void(0);"
+                               class="easyui-linkbutton" data-options="iconCls:'icon-role-gear',plain:true"
+                               onclick="fGrantRole();">用户角色</a></td>
+                        <td>
+                            <div class="datagrid-btn-separator"></div>
+                        </td>
+                        <td><a id="userInfoManage_toolbar_grantOrganization" href="javascript:void(0);"
+                               class="easyui-linkbutton" data-options="iconCls:'icon-key',plain:true"
+                               onclick="fChangePwd();">密码修改</a></td>
+                        <td>
+                            <div class="datagrid-btn-separator"></div>
+                        </td>
+                        <td><a id="userInfoManage_toolbar_removeUser" href="javascript:void(0);"
+                               class="easyui-linkbutton" data-options="iconCls:'icon-user-delete',plain:true"
+                               onclick="fRemove();">禁用</a></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="userInfoManage_layout_center"
+     data-options="region:'center',border:false" style="overflow: hidden;">
+    <table id="userInfoManage_datagrid"></table>
+</div>
+
+<div id="userInfoManage_layout_south"
+     data-options="region:'south',border:false"
+     style="overflow: hidden; height: 30px">
+    <div id="userInfoManage_pagination"
+         style="background: #efefef; border: 1px solid #ccc;"></div>
+</div>
+
+</body>
+</html>

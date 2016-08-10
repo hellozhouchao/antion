@@ -1,0 +1,111 @@
+<script type="text/javascript" charset="utf-8">
+	var eUserOrgDatagrid;
+	var eUserOrgPagination;
+    $(function () {
+    	var $userOrgDatagrid = $('#userOrgForm_datagrid');
+   	    var $userOrgPagination = $('#userOrgForm_pagination');
+   	    eUserOrgDatagrid = drawPlugin.userOrgListDatagrid('userOrgForm_datagrid', 'userOrgForm_toolbar');
+   	    eUserOrgPagination = $userOrgPagination.pagination(
+   	            {
+   	                pageList: [ 5, 10, 30],
+   	                onSelectPage: function (pageNumber, pageSize) {
+   	                    fSearchOrg();
+   	                }
+   	            }).pagination('refresh', {
+   	                total: 0,
+   	                pageNumber: 1
+   	            });
+    });
+    
+    var fSearchOrg = function () {
+        var aSearchParam = fCollectSearchConOrg(); // 搜集查询条件
+        eUserOrgDatagrid.datagrid('uncheckAll');
+        var pageNumber = eUserOrgPagination.pagination('options').pageNumber;
+        var pageSize = eUserOrgPagination.pagination('options').pageSize;
+        var data = {
+            pageGrid: utils.createPageGrid(aSearchParam, pageNumber, pageSize)
+        };
+        utils.ajaxPost(staticParam.action_reqPath_main, "getOrgInfoList",
+                data.pageGrid, function (o) {
+                    eUserOrgDatagrid.datagrid('uncheckAll');
+                    eUserOrgDatagrid.datagrid('loadData', o.jsonData.rows); // 加载Datagrid数据
+                    eUserOrgPagination.pagination('refresh', {
+                        total: o.jsonData.total
+                    });
+                });
+    }
+    
+    var fCollectSearchConOrg = function () {
+        var aSearchCondition = extUtil.serializeObject($('#userOrgForm_toolbar_searchForm'));
+        // 循环searchCondition，若内key值为“”则置为null
+        for (var i in aSearchCondition) {
+            if (aSearchCondition[i] == "") {
+                aSearchCondition[i] = null;
+            }
+        }
+        return aSearchCondition;
+    }
+    
+    var fCleanSearchOrg = function () {
+        $('#userOrgForm_toolbar input').val('');// 清空文本框
+        eUserOrgPagination.pagination('refresh', {
+            total: 0,
+            pageNumber: 1
+        });
+        fSearchOrg(); //TODO 有问题：第二页再查询存在的
+    }
+    
+</script>
+<div id="userOrgForm_div" align="center" class="easyui-layout" data-options="fit:true,border:false">
+	<div id="userOrgForm_toolbar" style="display: none;">
+    <table>
+        <tr>
+            <td>
+                <form id="userOrgForm_toolbar_searchForm">
+                    <table>
+                        <tr>
+                            <td>机构代码:</td>
+                            <td><input name="orgNo" style="width: 80px;"/></td>
+                            <td>机构名称:</td>
+                            <td><input name="orgName" style="width: 80px;"/></td>
+                            <td>机构类型：<select id="orgType" name="orgType"
+	                            class="easyui-combobox combobox-f combo-f"
+	                            data-options="panelHeight:'auto',editable:false"
+	                            style="width: 80px; display: none;">
+			                    <option value="01">银联</option>
+			                    <option value="02">商户</option>
+			                    <option value="03">银行</option>
+			                </select></td>
+			             </tr>
+			             <tr>
+			             	<td colspan="4"></td>
+                            <td colspan="2">
+                                <a id="userOrgForm_toolbar_search" href="javascript:void(0);"
+                                   class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true"
+                                   onclick="fSearchOrg();">查询</a>
+                                <div class="datagrid-btn-separator"></div>
+                                <a id="userOrgForm_toolbar_cleanSearch" href="javascript:void(0);"
+                                   class="easyui-linkbutton" data-options="iconCls:'icon-reload',plain:true"
+                                   onclick="fCleanSearchOrg();">重置查询</a>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="userOrgForm_layout_center"
+     data-options="region:'center',border:false" style="overflow: hidden;">
+    <table id="userOrgForm_datagrid"></table>
+</div>
+
+<div id="userOrgForm_layout_south"
+     data-options="region:'south',border:false"
+     style="overflow: hidden; height: 30px">
+    <div id="userOrgForm_pagination"
+         style="background: #efefef; border: 1px solid #ccc;"></div>
+</div>
+
+</div>

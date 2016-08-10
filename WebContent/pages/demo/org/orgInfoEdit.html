@@ -1,0 +1,37 @@
+<div id="orgInfoEdit_div" align="center">
+    <form id="orgInfoEdit_form" method="post" class="form">
+        <table id="orgInfoEdit_table" class="table" style="width: 100%;">
+            <tbody>
+            <tr>
+                <th>机构编码：</th>
+                <td><input name="orgCode"
+                           class="easyui-validatebox validatebox-text validatebox-invalid"
+                           data-options="required:true, validType:['spaceMatch[0]','lengthMatch[9]']"><span
+                        style="color: red">*</span></td>
+                <th>机构名称：</th>
+                <td><input name="orgName"
+                           class="easyui-validatebox validatebox-text validatebox-invalid"
+                           data-options="required:true, validType:['spaceMatch[0]']"><span style="color: red">*</span>
+                </td>
+            </tr>
+
+            <tr>
+                <th>父级机构：</th>
+                <td><input id="father_org" class="easyui-validatebox" name="fatherOrgId" readonly="readonly"
+                           data-options="required:true,">
+                    &nbsp;
+                    <a id="orgInfoEdit_chooseOrg_btn" href="javascript:void(0);"
+                       class="easyui-linkbutton" data-options="iconCls:'icon-org'">机构</a></td>
+                <th>机构状态：</th>
+                <td><select id="orgStatus" name="orgStatus"
+                            class="easyui-combobox combobox-f combo-f"
+                            data-options="panelHeight:'auto',editable:false"
+                            style="width: 155px; display: none;">
+                    <option value="0">可用</option>
+                    <option value="1">锁定</option>
+                </select></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>

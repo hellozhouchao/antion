@@ -1,0 +1,72 @@
+<script type="text/javascript" charset="utf-8">
+    $(function () {
+
+    });
+</script>
+<div id="userEdit_div" align="center">
+    <form id="userEdit_form" method="post" class="form">
+        <table id="userEdit_table" class="table" style="width: 100%;">
+            <tbody>
+            <tr>
+                <th><span style="color: red">*</span>用户姓名：</th>
+                <td><input name="fullName"
+                           class="easyui-validatebox validatebox-text validatebox-invalid"
+                           data-options="required:true, validType:['spaceMatch[0]']"></td>
+                <th>性别：</th>
+                <td><select name="sex"
+                            class="easyui-combobox combobox-f combo-f"
+                            data-options="panelHeight:'auto',editable:false"
+                            style="width: 155px; display: none;">
+                    <option value="01">未选择</option>
+                    <option value="02">男</option>
+                    <option value="03">女</option>
+                </select></td>
+
+            </tr>
+            <tr>
+                <th><span style="color: red">*</span>登录名：</th>
+                <td><input id="userName" name="userName" type="text"
+                           class="easyui-validatebox validatebox-text validatebox-invalid"
+                           data-options="required:true,validType:['spaceMatch[0]']">&nbsp;&nbsp;
+                    <a id="userEdit_checkUserName_btn" href="javascript:void(0);"
+                       class="easyui-linkbutton" data-options="iconCls:'icon-check'">检测</a></td>
+                <td colspan="2"><span id="userEdit_checkUserName_span"></span></td>
+            </tr>
+            <tr>
+            	<th>用户类型：</th>
+                <td><select id="userType" name="userType"
+                            class="easyui-combobox combobox-f combo-f"
+                            data-options="panelHeight:'auto',editable:false"
+                            style="width: 155px; display: none;">
+                    <option value="1">管理员</option>
+                    <option value="0">普通用户</option>
+                </select></td>
+                <th>用户状态：</th>
+                <td><select id="userStatus" name="userStatus"
+                            class="easyui-combobox combobox-f combo-f"
+                            data-options="panelHeight:'auto',editable:false"
+                            style="width: 155px; display: none;">
+                    <option value="01">可用</option>
+                    <option value="02">锁定</option>
+                    <option value="03">注销</option>
+                </select></td>
+                <td colspan="2"><span id="userEdit_userStatus_span"></span></td>
+            </tr>
+            <tr>
+                <th>手机号码：</th>
+                <td><input name="handset" class="easyui-validatebox"
+                           data-options="validType:'lengthMatch[11]'"></td>
+                <th>工作邮箱：</th>
+                <td><input name="workmail" class="easyui-validatebox"
+                           data-options="validType:['email','length[0,20]']"></td>
+            </tr>
+            <tr>
+                <td><input name="userId" type="hidden"></td>
+                <td><input name="userCode" type="hidden"></td>
+                <td><input name="" type="hidden"></td>
+                <td><input name="" type="hidden"></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>

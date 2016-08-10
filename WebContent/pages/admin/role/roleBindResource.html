@@ -1,0 +1,36 @@
+<div id="role_reource_body" class="easyui-layout" data-options="fit:true">
+	<div id="role_resource_bindDatagrid_toolbar">
+		<form id="role_resource_bind_form" method="post">
+			<table id="role_resource_bind_tab">
+				<tbody>
+					<tr>
+						<th>角色编号:</th>
+						<td><input id="roleCode" name="roleCode" disabled="disabled" width="100px">
+						</td>
+						<th>角色名称:</th>
+						<td><input id="roleName" name="roleName" disabled="disabled" width="150px">
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
+
+	<div id="role_reource_body_center_div" data-options="region:'center', border:false," style="overflow: hidden;" >
+		<div id="role_reource_body1" class="easyui-layout" data-options="fit:true">
+			<div id="role_reource_body_center_div1" data-options="region:'center', border:false," style="overflow: hidden;" >
+			        <table id="role_resource_bindDatagrid"></table>
+			</div>
+			<div id="role_reource_body_south_div1" data-options="region:'south',border:false"
+		         style="overflow: hidden; height: 30px">
+		        <div id="role_resource_bindInfoDatagrid_pagination"
+		             style="background: #efefef; border: 1px solid #ccc;"></div>
+		    </div>
+	    </div>
+    </div>
+	
+	<div id="role_reource_body_east_div" data-options="region:'east', border:false"
+			style="overflow: hidden;width:300px;" >
+	        <table id="role_resource_sub_bindDatagrid"></table>
+	</div>
+</div> 

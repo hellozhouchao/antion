@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<script type="text/javascript" charset="utf-8">
+    $(function () {
+    	drawPlugin.noticeDatagrid("portal2_datagrid", "");
+		parent.facade.sendNotification(
+				ejx4ui.AppConstants.COMMON_NOTICE_DATA_REQUEST, {
+					npFlag : '1'
+				});
+	});
+</script>
+<div>
+	<table id="portal2_datagrid"></table>
+</div>

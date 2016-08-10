@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>A4页面维护</title>
+<script src="../../../js/commonIframe.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$('#a4_grid').datagrid({
+			fitColumns:true,
+			striped:true,
+			checkOnSelect:true,
+			toolbar:'#a4_grid_toolbar',
+			columns:[[
+			{
+				field : 'ck',
+				checkbox : true
+			}, {
+				field : 'userId',
+				title : '用户ID',
+				width : 100
+			}, {
+				field : 'authTypeCode',
+				title : '认证方式',
+				width : 100
+			}, {
+				field : 'remark',
+				title : '备注',
+				width : 100
+			}]]
+		});
+	
+		$('#a4_grid_pagination').pagination({
+			pageList : [ 10, 20, 50, 80 ],
+			onSelectPage : function(pageNumber, pageSize) {
+				query();
+			},
+		});
+	})
+
+	// 查询方法
+	function query() {
+		var searchCondition = extUtil.serializeObject($('#a4_toolbar_searchForm'));
+		// 循环searchCondition，若内key值为“”则置为null
+		for ( var key in searchCondition) {
+			if (searchCondition[key] == "") {
+				searchCondition[key] = null;
+			}
+		}
+		var pageNumber = $('#a4_grid_pagination').pagination('options').pageNumber;
+		var pageSize = $('#a4_grid_pagination').pagination('options').pageSize;
+		var pageGrid = utils.createPageGrid(searchCondition, pageNumber, pageSize);
+
+		utils.ajaxPost(staticParam.action_reqPath_demo, 'listCredence', pageGrid, 
+				function(data) {
+					var result = data;
+					$('#a4_grid').datagrid('loadData', result.rows); // 加载Datagrid数据
+					$('#a4_grid_pagination').pagination('refresh', 
+						{
+							total : result.total
+						});
+				});
+
+	}
+	
+	//清空查询条件
+	function clearSearch() {
+		$('#a4_toolbar_searchForm input').val('');// 清空文本框
+	}
+
+	// 编辑功能
+	function openWin() {
+		editDialog = extJQ.dialog({
+			title : '新增凭证信息',
+			href : 'a4Edit.html',
+			width : 400,
+			height : 220,
+			buttons : [
+					{
+						text : '保存',
+						iconCls : 'icon-add',
+						handler : function() {
+							var isValid = $("#a4_edit_form").form('validate');
+							if (!isValid) {
+								$.messager.alert("提示", "校验未通过，请检查输入项！",'warning');
+								return;
+							}
+							var addCondition = extUtil.serializeObject($('#a4_edit_form').form());
+
+							utils.ajaxPost(staticParam.action_reqPath_demo,'addCredence', addCondition, 
+									function(o) {
+										$('#a4_grid').datagrid("insertRow", {
+													index : 0,
+													row : o.credence
+												});
+										editDialog.dialog('close');
+									});
+						}
+					}, {
+						text : '关闭',
+						iconCls : 'icon-cancel',
+						handler : function() {
+							editDialog.dialog('close');
+						}
+					} ]
+		})
+	};
+
+
+	function openUWin() {
+		var row = $('#a4_grid').datagrid('getChecked');
+		if (row.length != 1) {
+			parent.extJQ.messagerAlert('提示', '请勾选一个需要编辑的记录！', 'error');
+			return;
+		}
+		updateDialog = extJQ.dialog({
+			title : '修改凭证信息',
+			href : 'a4Edit.html',
+			width : 400,
+			height : 220,
+			buttons : [
+					{
+						text : '保存',
+						iconCls : 'icon-add',
+						handler : function() {
+							var isValid = $("#a4_edit_form").form('validate');
+							if (!isValid) {
+								$.messager.alert("提示", "校验未通过，请检查输入项！",
+										'warning');
+								return;
+							}
+							var addCondition = extUtil.serializeObject($(
+									'#a4_edit_form').form());
+							addCondition['credenceId'] = row[0].credenceId; // 加上唯一索引
+
+							utils.ajaxPost(staticParam.action_reqPath_demo,'updateCredence', addCondition,
+									function(o) {
+										updateDialog.dialog('close');
+										query();
+									});
+						}
+					}, {
+						text : '关闭',
+						iconCls : 'icon-cancel',
+						handler : function() {
+							updateDialog.dialog('close');
+						}
+					} ],
+			onLoad : function() {
+				$('#a4_edit_form').form('load', row[0]);
+				$('#userId').attr('readonly','readonly');		// userId 和 authTypeCode 这两个字段不能编辑
+				$('#authTypeCode').attr('readonly','readonly');
+			}
+		})
+	}
+
+</script>
+</head>
+<body id="a4_layout_div" class="easyui-layout"  data-options="fit:true,border:false">
+	<div id="a4_grid_toolbar">
+		<table>
+			<tr>
+				<td>
+					<form id="a4_toolbar_searchForm">
+						<table>
+							<tr>
+								<td>用户：</td>
+								<td><input name="userId" style="width: 80px;" /></td>
+								<td>认证方式：</td>
+								<td><input name="authTypeCode" style="width: 80px;" /></td>
+								<td>
+									<a id="a4_toolbar_search" href="javascript:void(0);" onclick="query();" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">查询</a>
+									<div class="datagrid-btn-separator"></div>
+	                				<a id="a4_toolbar_cleanSearch" href="javascript:void(0);" onclick="clearSearch();" class="easyui-linkbutton" data-options="iconCls:'icon-reload',plain:true">清空</a>
+								</td>
+							</tr>
+						</table>
+					</form>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table>
+						<tr>
+							<td><a id="a4_toolbar_addRole" href="javascript:void(0);" onclick="openWin();" class="easyui-linkbutton" data-options="iconCls:'icon-role-add',plain:true">新增</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+				            <td><a id="a4_toolbar_updateRole" href="javascript:void(0);" onclick="openUWin();" class="easyui-linkbutton" data-options="iconCls:'icon-role-edit',plain:true">修改</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+				            <td><a id="a4_toolbar_deleteRole" href="javascript:void(0);" onclick="deleteRoles();" class="easyui-linkbutton" data-options="iconCls:'icon-role-delete',plain:true">删除</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<div id="a4_layout_center" data-options="region:'center',border:false" style="overflow: hidden;">
+        <table id="a4_grid"></table>
+    </div>
+    
+    <div id="a4_layout_south" data-options="region:'south',border:false" style="overflow: hidden; height: 30px">
+        <div id="a4_grid_pagination" style="background: #efefef; border: 1px solid #ccc;"></div>
+    </div>
+</body>
+</html>

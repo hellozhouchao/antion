@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>A4页面维护</title>
+<script src="../../../js/commonIframe.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$('#a4_grid').datagrid({
+			fitColumns:true,
+			striped:true,
+			checkOnSelect:true,
+			toolbar:'#a4_grid_toolbar',
+			columns:[[
+			{
+				field : 'ck',
+				checkbox : true
+			}, {
+				field : 'userId',
+				title : '用户ID',
+				width : 100
+			}, {
+				field : 'authTypeCode',
+				title : '认证方式',
+				width : 100
+			}]]
+		});
+	
+		$('#a4_grid_pagination').pagination({
+			pageList : [ 10, 20, 50, 80 ],
+			onSelectPage : function(pageNumber, pageSize) {
+				query();
+			},
+		});
+	})
+
+	// 查询方法
+	function query() {
+	}
+	
+</script>
+</head>
+<body id="a4_layout_div" class="easyui-layout"  data-options="fit:true,border:false">
+	<div id="a4_grid_toolbar">
+	</div>
+
+	<div id="a4_layout_center" data-options="region:'center',border:false" style="overflow: hidden;">
+        <table id="a4_grid"></table>
+    </div>
+    
+    <div id="a4_layout_south" data-options="region:'south',border:false" style="overflow: hidden; height: 30px">
+        <div id="a4_grid_pagination" style="background: #efefef; border: 1px solid #ccc;"></div>
+    </div>
+</body>
+</html>

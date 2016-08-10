@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<script type="text/javascript">
+<!--
+function fLogoutReq() {
+	window.location.href = 'servlet/sessionServlet';
+}
+-->
+
+</script>
+<div class="alert" style="position: absolute; right: 0px; bottom: 0px; ">
+	<table id="layout_north_toolbar">
+		<tr>
+			<td>
+				<div id="sessionInfoDiv_user"
+					style="color: #3a87ad; border-color: #bce8f1;">
+					欢迎您,【<strong><span id="loginUserName" style="color: blue"></span></strong>】
+				</div>
+			</td>
+			<td>|</td>
+			<td>
+				<div id="sessionInfoDiv_terminal"
+					style="color: #3a87ad; border-color: #bce8f1;">
+					IP:【<strong><span id="loginIpAddr" style="color: red"></span></strong>】
+				</div>
+			</td>
+			<td><a href="javascript:void(0);" class="easyui-menubutton"
+				data-options="menu:'#layout_north_kzmbMenu',iconCls:'icon-wrench'">控制面板</a>
+			</td>
+			<td><a id="logoutFun_btn" href="javascript:void(0);"
+				class="easyui-linkbutton"
+				data-options="iconCls:'icon-logout',plain:true"
+				onclick="javascript:fLogoutReq();">注销</a></td>
+		</tr>
+	</table>
+</div>
+
+<div id="layout_north_kzmbMenu" style="width: 120px; display: none;">
+	<div id="north_pfMenu_changePwd"
+		data-options="iconCls:'icon-key'">密码修改</div>
+	<div class="menu-sep"></div>
+<!-- 	<div> -->
+<!-- 		<span>更换主题</span> -->
+<!-- 		<div style="width: 120px;"> -->
+<!-- 			<div onclick="extJQ.changeTheme('default');" title="Default" -->
+<!-- 				data-options="iconCls:'icon-remove'">清新兰</div> -->
+<!-- 			<div onclick="extJQ.changeTheme('gray');" title="Gray" -->
+<!-- 				data-options="iconCls:'icon-remove'">沉稳灰</div> -->
+<!-- 			<div onclick="extJQ.changeTheme('bootstrap');" title="Gray" -->
+<!-- 				data-options="iconCls:'icon-remove'">BootStrap</div> -->
+<!-- 		</div> -->
+<!-- 	</div> -->
+</div>

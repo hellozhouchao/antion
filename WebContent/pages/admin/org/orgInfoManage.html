@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>机构信息管理</title>
+<script src="../../../js/commonIframe.js"></script>
+<script type="text/javascript">
+var eOrgInfoDatagrid;
+var eOrgInfoPagination;
+var eOrgInfoDialog;
+var eUserRoleGrantDialog;
+var iWidthDialog = 650;
+var iHeightDialog = 420;
+
+var fAdd = function () {
+	// 绘制窗口内的按钮
+    var sOrgInfoSavetn = utils.createButtonA("orgInfo_btn_save", "icon-ok", "保存");
+    var sOrgInfoCancelBtn = utils.createButtonA("orgInfo_btn_cancel", "icon-ok", "取消");
+    var sBtnsHtml = utils.createButtonDiv("orgInfo_add_btns", [sOrgInfoSavetn, sOrgInfoCancelBtn]);
+    $("#btn_div").append(sBtnsHtml);
+    $.parser.parse("#btn_div");
+    
+    eOrgInfoDialog = extJQ.dialog({
+        title: '新增机构信息',
+        href: 'orgInfoForm.html',
+        width: iWidthDialog,
+        height: iHeightDialog,
+        buttons: '#orgInfo_add_btns',
+        onLoad: function () {
+            var $CheckOrgNoSpan = $('#orgInfoForm_checkOrgNo_span');
+            var $CheckOrgNoBtn  = $('#orgInfoForm_checkOrgNo_btn');
+            $CheckOrgNoSpan.attr("checkFlag", false);
+            $CheckOrgNoBtn.bind('click', function () {
+                var $OrgNo = $("#orgInfoForm_table tr td").find("input[name='orgNo']");
+                var sOrgNo = $OrgNo.val().replace(/\s+/g, "");
+                if (sOrgNo) {
+                    $CheckOrgNoBtn.linkbutton("disable"); // 停用按钮
+                    $CheckOrgNoSpan.html("正在检测中……");
+                    var oReqData/*请求数据*/ = {
+                        orgNo: sOrgNo
+                    };
+                    utils.ajaxPost(staticParam.action_reqPath_main, "getOrgInfoById", oReqData,
+                            function (o) {
+                                $CheckOrgNoBtn.linkbutton("enable");
+                                $CheckOrgNoSpan.attr("checkFlag", true).html("机构编号可用！");
+                            },
+                            function (o) {
+                                $CheckOrgNoBtn.linkbutton("enable");
+                                $CheckOrgNoSpan.attr("checkFlag", false).html("机构编号已占用，请更换！");
+                            });
+                } else {
+                    $CheckOrgNoSpan.html("请输入正确的机构编号！");
+                    $OrgNo.val('');
+                }
+            });
+            // 用来检测文本域文字输入状态 ,当状态改变的时候执行的函数
+            extUtil.watchElementById("orgNo", function () {
+                $CheckOrgNoSpan.attr("checkFlag", false).html("请校验机构编号！");
+            });
+            
+            $('#verifyState').combobox("disable");	
+    		$('#verifyReason').attr("disabled","disabled");
+        }
+    });
+};
+
+var fView = function () {
+	var aRows = eOrgInfoDatagrid.datagrid('getSelections');
+	   if (aRows.length != 1) {
+	       extJQ.messagerAlert('提示', '请只勾选一条需要编辑的用户记录！', 'error');
+	       return;
+	   }
+	utils.ajaxPost(staticParam.action_reqPath_main, 'getPageResource', {functionUrl : 'orgInfoForm'}, 
+			function(o){
+		    var sOrgInfoSavetn = utils.createButtonA("orgInfo_btn_update", "icon-ok", "保存");
+		    var sOrgInfoCancelBtn = utils.createButtonA("orgInfo_btn_cancel", "icon-cancel", "取消");
+		    var sBtnsHtml = utils.createButtonS("orgInfo_view_btns",[sOrgInfoSavetn, sOrgInfoCancelBtn], o);
+		    console.info(sBtnsHtml);
+		    $("#btn_div").append(sBtnsHtml);
+		    $.parser.parse("#btn_div");
+		    $('#userEdit_checkUserId_span').attr("checkFlag", false);
+		    $('#userEdit_checkOrgNo_span').attr("checkFlag", false);
+		    eOrgInfoDialog = extJQ.dialog({
+		        title: '更新机构信息',
+		        href: 'orgInfoForm.html',
+		        width: iWidthDialog,
+		        height: iHeightDialog,
+		        buttons: '#orgInfo_view_btns',
+		        onLoad: function () { // 动态加载，数据填充
+		            $('#orgInfoForm_form').form('load', aRows[0]);
+		            var iCurrentOrgInfoIndex =  eOrgInfoDatagrid.datagrid('getRowIndex', aRows[0]);
+		            var sOrginalOrgNo/* 初始状态数据 */ = aRows[0].orgNo;
+		            var sOrgAuth = aRows[0].orgAuth;
+		            var $OrgInfoBtnUpdate = $('#orgInfo_btn_update'); 	// 编辑保存按钮
+		            var $CheckOrgNoSpan = $('#orgInfoForm_checkOrgNo_span');
+		            var $CheckOrgNoBtn = $('#orgInfoForm_checkOrgNo_btn');
+		            var $OrgNo = $("#orgInfoForm_table tr td").find("input[name='orgNo']");
+		            utils.getCheckboxValStr('orgAuth', sOrgAuth); // 勾选交易权限的checkBox
+		            $('#orginalOrgNo').val(sOrginalOrgNo);
+		            $('#currentOrgInfoIndex').val(iCurrentOrgInfoIndex);
+		            $CheckOrgNoSpan.attr("checkFlag", true);
+		            $CheckOrgNoBtn.bind('click', function () {
+		                var sOrgNo = $OrgNo.val();
+		                if ($.trim(sOrgNo)) {
+		                    $CheckOrgNoBtn.linkbutton("disable"); // 停用按钮
+		                    $CheckOrgNoSpan.html("正在检测中……");
+		                    var oReqData/*请求数据*/ = {
+		                        orgNo: sOrgNo
+		                    };
+		                    utils.ajaxPost(staticParam.action_reqPath_main, "getOrgInfoById", oReqData,
+		                            function (o) {
+		                                $CheckOrgNoBtn.linkbutton("enable");
+		                                $CheckOrgNoSpan.attr("checkFlag", true).html("机构编号可用！");
+		                            },
+		                            function (o) {
+		                                $CheckOrgNoBtn.linkbutton("enable");
+		                                $CheckOrgNoSpan.attr("checkFlag", false).html("机构编号已占用，请更换！");
+		                            });
+		                } else {
+		                    $CheckOrgNoSpan.html("请输入正确的机构编号！");
+		                    $OrgNo.val('');
+		                }
+		            });
+		            extUtil.watchElementById("orgNo", function () {
+		                if (sOrginalOrgNo) {
+		                    if ($OrgNo.val() == sOrginalOrgNo) {
+		                        $CheckOrgNoSpan.attr("checkFlag", true).html("机构编号未变更。");
+		                        return;
+		                    }
+		                }
+		                $CheckOrgNoSpan.attr("checkFlag", false).html("请校验机构编号！");
+		            });
+		            extUtil.disableForm('orgInfoForm_form', "disabled");
+		            $CheckOrgNoBtn.linkbutton("disable"); 		// 停用检查机构编号按钮
+		            $OrgInfoBtnUpdate.linkbutton("disable"); 	// 停用编辑保存按钮
+		        }
+		    });
+		
+	});
+};
+
+var fRemove = function () {
+    // TODO 需要考虑删除自身的情况
+    var oRows = eOrgInfoDatagrid.datagrid('getSelections');
+    var aOrgNos = [];
+    var aRowIndexs = [];
+    if (oRows.length > 0) {
+        extJQ.messagerConfirm('询问', '您确定要删除所选记录？', function (r) {
+            if (r) {
+                for (var i = 0; i < oRows.length; i++) {
+                	aOrgNos.push(oRows[i].orgNo);// 保存到ids数组中
+                	aRowIndexs.push(eOrgInfoDatagrid.datagrid('getRowIndex', oRows[i]));
+                }
+                var oReqData = {
+                    orgNos: aOrgNos.join(',')
+                }
+                utils.ajaxPost(staticParam.action_reqPath_main, "removeOrgInfoByIds", oReqData, 
+                		function (o) {
+                            // 不走后台请求，进行界面移除
+                            for (var i = aRowIndexs.length-1; i > -1; i--) {
+//                              eOrgInfoDatagrid.datagrid('deleteRow', aRowIndexs[i]);
+                                eOrgInfoDatagrid.datagrid('updateRow',{
+									index: aRowIndexs[i],
+									row: {
+										orgState: staticParam.flag_false
+									}
+								});
+                            }
+                            // 重新请求数据 = 刷新fSearch();
+                        });
+            }
+        });
+    } else {
+        extJQ.messagerAlert('提示', '请勾选要删除的记录！', 'error');
+    }
+};
+
+var fSearch = function () {
+    var aSearchParam = fCollectSearchCon(); // 搜集查询条件
+    eOrgInfoDatagrid.datagrid('uncheckAll');
+    var pageNumber = eOrgInfoPagination.pagination('options').pageNumber;
+    var pageSize = eOrgInfoPagination.pagination('options').pageSize;
+    var data = {
+        pageGrid: utils.createPageGrid(aSearchParam, pageNumber, pageSize)
+    };
+    utils.ajaxPost(staticParam.action_reqPath_main, "getOrgInfoList",
+            data.pageGrid, function (o) {
+                eOrgInfoDatagrid.datagrid('uncheckAll');
+                eOrgInfoDatagrid.datagrid('loadData', o.jsonData.rows); // 加载Datagrid数据
+                eOrgInfoPagination.pagination('refresh', {
+                    total: o.jsonData.total
+                });
+            });
+}
+
+var fCleanSearch = function () {
+    $('#orgInfoManage_toolbar input').val('');// 清空文本框
+    eOrgInfoPagination.pagination('refresh', {
+        total: 0,
+        pageNumber: 1
+    });
+    fSearch(); //TODO 有问题：第二页再查询存在的
+}
+
+var fCollectSearchCon = function () {
+    var aSearchCondition = extUtil.serializeObject($('#orgInfoManage_toolbar_searchForm'));
+    // 循环searchCondition，若内key值为“”则置为null
+    for (var i in aSearchCondition) {
+        if (aSearchCondition[i] == "") {
+            aSearchCondition[i] = null;
+        }
+    }
+    var bSearchByDim/* 模糊查询标志 */ = $("#orgInfoManage_search_by_dim").prop("checked");
+    if (bSearchByDim) {
+        aSearchCondition.userName = null;
+        aSearchCondition.userNameLike = $('#userManage_toolbar_userName').val();
+    }
+    return aSearchCondition;
+}
+
+$(function () {
+    var $OrgInfoDatagrid = $('#orgInfoManage_datagrid');
+    var $OrgInfoPagination = $('#orgInfoManage_pagination');
+    utils.ajaxPost(staticParam.action_reqPath_main, 'getPageResource', {functionUrl : 'orgInfoManage'}, 
+		function(o){
+		    var sBtnsHtml = utils.createButtonS("orgInfoManage__btns",[], o);
+		    $("#orgInfoManage_btn_div").append(sBtnsHtml);
+		    $.parser.parse("#orgInfoManage_btn_div");
+		    $('#orgInfoManage_toolbar_view').bind('click',function(){
+		    	fView();
+		    });
+		    $('#orgInfoManage_toolbar_remove').bind('click',function(){
+		    	fRemove();
+		    });
+		    $('#orgInfoManage_toolbar_add').bind('click',function(){
+		    	fAdd();
+		    });
+		    eOrgInfoDatagrid = drawPlugin.orgInfoListDatagrid('orgInfoManage_datagrid','orgInfoManage_toolbar');
+    });
+		    
+    eOrgInfoPagination = $OrgInfoPagination.pagination(
+            {
+                pageList: [ 10, 50, 100, 300, 500 ],
+                onSelectPage: function (pageNumber, pageSize) {
+                    fSearch();
+                }
+            }).pagination('refresh', {
+                total: 0,
+                pageNumber: 1
+            });
+    
+});
+</script>
+</head>
+<body id="orgInfoManage_layout_body" class="easyui-layout" data-options="fit:true,border:false" >
+
+<div id="orgInfoManage_toolbar" style="display: none;">
+    <table>
+        <tr>
+            <td>
+                <form id="orgInfoManage_toolbar_searchForm">
+                    <table>
+                        <tr>
+                            <td>机构代码:</td>
+                            <td><input name="orgNo" style="width: 80px;"/></td>
+                            <td>机构名称:</td>
+                            <td><input name="orgName" style="width: 80px;"/></td>
+                            <td><span style="color: red">*</span>机构类型：</td>
+                            <td><select id="orgType" name="orgType"
+	                            class="easyui-combobox combobox-f combo-f"
+	                            data-options="panelHeight:'auto',editable:false"
+	                            style="width: 80px; display: none;">
+			                    <option value="01">银联</option>
+			                    <option value="02">商户</option>
+			                    <option value="03">银行</option>
+			                </select></td>
+			                <td><span style="color: red">*</span>机构状态：</td>
+			                <td><select id="orgState" name="orgState"
+	                            class="easyui-combobox combobox-f combo-f"
+	                            data-options="panelHeight:'auto',editable:false"
+	                            style="width: 80px; display: none;">
+			                   <option value="1">启用</option>
+			                   <option value="0">停用</option>
+			               	</select></td>
+                            <td>
+                                <a id="orgInfoManage_toolbar_search" href="javascript:void(0);"
+                                   class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true"
+                                   onclick="fSearch();">查询</a>
+                                <div class="datagrid-btn-separator"></div>
+                                <a id="orgInfoManage_toolbar_cleanSearch" href="javascript:void(0);"
+                                   class="easyui-linkbutton" data-options="iconCls:'icon-reload',plain:true"
+                                   onclick="fCleanSearch();">重置查询</a>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <td align="left">
+                            <div id="orgInfoManage_btn_div" align="left"></div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="orgInfoManage_layout_center"
+     data-options="region:'center',border:false" style="overflow: hidden;">
+    <table id="orgInfoManage_datagrid"></table>
+</div>
+
+<div id="orgInfoManage_layout_south"
+     data-options="region:'south',border:false"
+     style="overflow: hidden; height: 30px">
+    <div id="orgInfoManage_pagination"
+         style="background: #efefef; border: 1px solid #ccc;"></div>
+</div>
+
+<div id="btn_div"></div>
+
+</body>
+</html>

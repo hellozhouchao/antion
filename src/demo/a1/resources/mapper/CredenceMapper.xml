@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ejx4tut.demo.a1.mapper.CredenceMapper">
+
+	<resultMap id="resultMap" type="com.ejx4tut.demo.a1.domain.entity.Credence">
+		<result property="credenceId" 		column="CREDENCE_ID" 		jdbcType="VARCHAR" />
+		<result property="userId" 			column="USER_ID" 			jdbcType="VARCHAR" />
+		<result property="authTypeCode" 	column="AUTH_TYPE_CODE" 	jdbcType="CHAR" />
+		<result property="credenceExp" 		column="CREDENCE_EXP" 		jdbcType="CHAR" />
+		<result property="remark" 			column="REMARK" 			jdbcType="VARCHAR" />
+		<result property="st" 				column="ST" 				jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<select id="findById" parameterType="string" resultMap="resultMap">
+		select * 
+		from TAB_USER_CREDENCE 
+		where CREDENCE_ID 	=  #{credenceId}
+	</select>
+
+	<select id="findByUserID" parameterType="string" resultMap="resultMap">
+		select * 
+		from TAB_USER_CREDENCE 
+		where USER_ID= #{userId}
+	</select>
+	
+	<select id="findByUserAndAuthType"  resultMap="resultMap">
+		select * 
+		from TAB_USER_CREDENCE
+		where USER_ID= #{userId} 
+			  and AUTH_TYPE_CODE like #{authTypeCode}
+	</select>
+	
+	<insert id="insert" parameterType="com.ejx4tut.demo.a1.domain.entity.Credence">
+		insert into TAB_USER_CREDENCE(
+			CREDENCE_ID,
+			USER_ID,
+			AUTH_TYPE_CODE,
+			CREDENCE_EXP,
+			REMARK,
+			ST
+			)
+		values(
+			#{credenceId},
+			#{userId},
+			#{authTypeCode},
+			#{credenceExp},
+			#{remark},
+			#{st}
+			)
+	</insert>
+
+	<update id="update" parameterType="com.ejx4tut.demo.a1.domain.entity.Credence">
+		update TAB_USER_CREDENCE
+		set
+			USER_ID 	    =  #{userId}, 
+			AUTH_TYPE_CODE 	=  #{authTypeCode}, 
+			CREDENCE_EXP    =  #{credenceExp},
+			REMARK			=  #{remark},
+			ST      		=  #{st}
+		where 
+			CREDENCE_ID 	=  #{credenceId}
+	</update>
+
+	<delete id="deleteById" parameterType="string">
+		delete TAB_USER_CREDENCE
+		where 
+			CREDENCE_ID 	=  #{credenceId}
+	</delete>
+	
+	<!-- A4 查询 列表-->
+	<sql id="executionVariableQuery">
+    	from TAB_USER_CREDENCE  T
+    	<where>
+      		<if test="userId != null">			T.USER_ID 			= #{userId}   		</if>
+	   		<if test="authTypeCode != null">and T.AUTH_TYPE_CODE 	= #{authTypeCode}   </if>
+		</where>
+		order by USER_ID
+	</sql>
+	
+	<select id="selectList" parameterType="com.ejx4tut.demo.a1.domain.entity.Credence" resultMap="resultMap">
+		select *
+		<include refid="executionVariableQuery" />	
+	</select>
+
+</mapper> 

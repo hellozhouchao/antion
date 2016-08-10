@@ -1,0 +1,132 @@
+<!DOCTYPE HTML >
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>ejx4web</title>
+<link rel="stylesheet" type="text/css" href="css/login.css" />
+<script src="js/commonIframe.js"></script>
+
+<script type="text/javascript">
+  	
+	$(function() {
+		$('#logininput').bind('click', function() {
+			fLoginReq();
+		})
+
+// 		$('#authType').attr('disabled', 'disabled');
+
+		function fLoginReq() {
+			var oLoginReqData/*序列化表单数据*/= extUtil.serializeObject($('#login_loginDialog_form').form());
+			var sRedirect = extUtil.getUrlParam('redirect');
+			oLoginReqData.redirect = sRedirect;
+			utils.ajaxPost(staticParam.action_reqPath_login, 'loginSystem', oLoginReqData, 
+					function(data) {
+						var sHref = extUtil.getProjectName();
+						if (sRedirect == null || sRedirect.length < 1) {
+							// 跳转到项目主页（index.html）
+							sHref = sHref + '/index.html?' + utils.createUUID();
+						} else {
+							// 跳转到登录前访问的页面
+							sHref = sHref +  sRedirect + utils.createUUID();
+						}
+						window.location.href = sHref;
+						// window.location.href = 'index.html?' + utils.createUUID();
+					}, function(o) {
+						$('#errdiv').css("display", 'block');
+						$('#errinfo').html(o.msg);
+						if(o.obj){ // 刷新验证码
+							changeVeryCode();
+						}
+					});
+		};
+
+		$('#login_loginDialog_form input').bind('keyup', function(event) {/*增加回车提交功能*/
+			if (event.keyCode == '13') {
+				var sLoginName = $("#loginName").val();
+				var sPassword = $("#password").val();
+				if(sLoginName && sPassword){
+					fLoginReq();
+				}
+			}
+		});
+
+	});
+	
+	 function changeVeryCode() {
+		var veryCode = document.getElementById('veryCodeImg');
+		veryCode.src = 'servlet/imageRandServlet?' + Math.random();
+	}
+</script>
+</head>
+<body>
+
+	<script type="text/javascript">
+  	if(top!=self){
+    	top.location.href = extUtil.getProjectName() + '/login.html?' + utils.createUUID();
+    }
+  	</script>
+  	
+	<div id="wrapper" align="center">
+		<div id="header" style="padding-top: 15px; border-bottom: 10px solid #88BCEE; padding-bottom: 15px;">
+		</div>
+		<div id="content" style="padding-top: 15px;">
+				<div class="passPro">
+					<div style="border: 1px solid #CECECE; width: 695px; height: 232px;">
+					</div>
+				</div>
+				<div style="float: left; padding-left: 8px;">
+				<div class="passAccInfo">
+					<div class="tabcontent">
+						<div class="tab-pane active" id="page1">
+							<form id="login_loginDialog_form" class="passAccForm"
+								method="post">
+								<div id="errdiv" class="alert-error alert dispaly"
+									align="center">
+									<span id="errinfo"></span>
+								</div>
+								<p>
+									<span class="lable">机&nbsp;构&nbsp;码：</span> <input
+										id="orgNo" name="orgNo" type="text"
+										class="input-small inputwinth" placeholder="用户所属机构码"> <br>
+								</p>
+								<p>
+									<span class="lable">登&nbsp;录&nbsp;名：</span> <input
+										id="loginName" name="loginName" type="text"
+										class="input-small inputwinth" placeholder="用户登入名" > <br>
+								</p>
+								<p>
+									<span class="lable">密&nbsp;&nbsp;&nbsp;&nbsp;码：</span> <input
+										id="password" name="password" type="password"
+										class="input-small inputwinth"> <br>
+								</p>
+								<p>
+									<span class="lable">验&nbsp;证&nbsp;码：</span> 
+									<input id="veryCode" name="veryCode" type="text"
+										class="input-small inputwinth" width="80px" placeholder="验证码">
+										<img id="veryCodeImg" src="servlet/imageRandServlet"  title="看不清，点击换一张！" onclick="this.src='servlet/imageRandServlet?tm='+Math.random()">
+										<a href="#" onclick="changeVeryCode();" style="color:red; font-size:12px; text-decoration:none;">刷新验证码</a><br>
+								</p>
+
+								<br>
+								<p id="loginp" class="pass_login_p pass_login_p_btn"
+									align="center">
+									<input id="logininput" class="logininput" type="button"
+										value="登录"> 
+									<img id="wait" src="images/login/indicator_arrows.gif" class="wjmm dispaly" />
+								</p>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="footer" style="border-top: 3px solid #88BCEE">
+			<div>
+				Copyright 2014 by TIENON | 项目组联系邮箱：<a href="mailto:text@text.com"
+					style="text-decoration: none;">text@text.com</a>
+			</div>
+			<p>浏览器IE8以上版本能达到最佳浏览效果</p>
+		</div>
+	</div>
+</body>
+</html>

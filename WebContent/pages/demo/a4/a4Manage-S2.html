@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>A4页面维护</title>
+<script src="../../../js/commonIframe.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$('#a4_grid').datagrid({
+			fitColumns:true,
+			striped:true,
+			checkOnSelect:true,
+			toolbar:'#a4_grid_toolbar',
+			columns:[[
+			{
+				field : 'ck',
+				checkbox : true
+			}, {
+				field : 'userId',
+				title : '用户ID',
+				width : 100
+			}, {
+				field : 'authTypeCode',
+				title : '认证方式',
+				width : 100
+			}]]
+		});
+	
+		$('#a4_grid_pagination').pagination({
+			pageList : [ 10, 20, 50, 80 ],
+			onSelectPage : function(pageNumber, pageSize) {
+				var data = {
+					pageGrid : utils.createPageGrid({}, pageNumber, pageSize)
+				};
+				query();
+			},
+		});
+	})
+
+	// 查询方法
+	function query() {
+	}
+	
+	//清空查询条件
+	function clearSearch() {
+		$('#a4_toolbar_searchForm input').val('');// 清空文本框
+	}
+
+</script>
+</head>
+<body id="a4_layout_div" class="easyui-layout"  data-options="fit:true,border:false">
+	<div id="a4_grid_toolbar">
+		<table>
+			<tr>
+				<td>
+					<form id="a4_toolbar_searchForm">
+						<table>
+							<tr>
+								<td>用户：</td>
+								<td><input name="userId" style="width: 80px;" /></td>
+								<td>认证方式：</td>
+								<td><input name="authTypeCode" style="width: 80px;" /></td>
+								<td>
+									<a id="a4_toolbar_search" href="javascript:void(0);" onclick="query();" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">查询</a>
+									<div class="datagrid-btn-separator"></div>
+	                				<a id="a4_toolbar_cleanSearch" href="javascript:void(0);" onclick="clearSearch();" class="easyui-linkbutton" data-options="iconCls:'icon-reload',plain:true">清空</a>
+								</td>
+							</tr>
+						</table>
+					</form>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table>
+						<tr>
+							<td><a id="a4_toolbar_addRole" href="javascript:void(0);" onclick="openWin();" class="easyui-linkbutton" data-options="iconCls:'icon-role-add',plain:true">新增</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+				            <td><a id="a4_toolbar_updateRole" href="javascript:void(0);" onclick="openUWin();" class="easyui-linkbutton" data-options="iconCls:'icon-role-edit',plain:true">修改</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+				            <td><a id="a4_toolbar_deleteRole" href="javascript:void(0);" onclick="deleteRoles();" class="easyui-linkbutton" data-options="iconCls:'icon-role-delete',plain:true">删除</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<div id="a4_layout_center" data-options="region:'center',border:false" style="overflow: hidden;">
+        <table id="a4_grid"></table>
+    </div>
+    
+    <div id="a4_layout_south" data-options="region:'south',border:false" style="overflow: hidden; height: 30px">
+        <div id="a4_grid_pagination" style="background: #efefef; border: 1px solid #ccc;"></div>
+    </div>
+</body>
+</html>

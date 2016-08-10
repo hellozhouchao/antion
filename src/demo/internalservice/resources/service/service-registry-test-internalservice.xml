@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services>
+
+	<service id="internalServiceTest" type="spring" bean-id="demoInternalServiceService" method="test">
+		<method-arguments>
+			<argument name="arg" type="java.util.HashMap" expression="input" />
+		</method-arguments>
+	</service>
+
+</services>

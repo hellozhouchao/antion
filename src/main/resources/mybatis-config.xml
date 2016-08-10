@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<settings>
+		<setting name="lazyLoadingEnabled" value="false" />
+	</settings>
+
+	<plugins>
+		<plugin
+			interceptor="com.tienon.framework.persistence.mybatis.paginator.OffsetLimitInterceptor">
+			<property name="dialectClass"
+				value="com.tienon.framework.persistence.mybatis.paginator.dialect.H2Dialect" />
+		</plugin>
+	</plugins>
+    
+	<mappers>
+		<!-- EJX4framework使用 -->
+		<mapper resource="com/tienon/component/param/ParameterMapper.xml" />
+
+		<!-- EJX4web使用 -->
+		<mapper resource="mapper/RoleMapper.xml" />
+		<mapper resource="mapper/UserInfoMapper.xml" />
+		<mapper resource="mapper/OrgInfoMapper.xml" />
+		<mapper resource="mapper/PageResourceMapper.xml" />
+		<mapper resource="mapper/ServiceResourceMapper.xml" />
+		<mapper resource="mapper/UserRoleBindMapper.xml" />
+		<mapper resource="mapper/RoleResourceBindMapper.xml" />
+		<mapper resource="mapper/TinosNoticePromptMapper.xml" />
+		<mapper resource="mapper/TinosInstMapper.xml" />
+
+		<!-- demo使用 -->
+		<mapper resource="mapper/CredenceMapper.xml" />
+		
+	</mappers>
+
+</configuration>

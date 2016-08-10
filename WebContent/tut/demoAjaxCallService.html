@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style>
+body {
+	text-align: center
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script src="../js/commonIframe.js"></script>
+
+<script>
+	var demo = "演示AJAX调用Service";
+
+	function test() {
+		var jsonRequest = {
+				remark: "测试JOSN请求",
+				userId : 'UserNameTest',
+				AuthTypeCode : '11'
+			};
+	
+		$("#function").html(demo)
+		$("#request").html(extUtil.json2Str(jsonRequest));
+
+		$("#testAjaxJSON").click(function(event) {
+			$.post('frameworkTestAjax.action', {
+				'_sid' : 'tcommTestOutboundService',
+				'json' : extUtil.json2Str(jsonRequest)
+			}, function(data) {
+				var tval = extUtil.str2Json(data);
+				$('#response').html(data);
+				console.log(tval);
+				console.log(extUtil.json2Str(tval));
+			});
+		});
+	}
+
+	$(document).ready(test);
+</script>
+</head>
+
+<body>
+
+	<h4>测试功能</h4>
+	<p id="function"></p>
+
+	<h4>请求数据</h4>
+	<p id="request"></p>
+
+	<h4>响应数据</h4>
+	<p id="response">空</p>
+
+	<button id="testAjaxJSON" type="button">发送请求</button>
+
+</body>
+</html>

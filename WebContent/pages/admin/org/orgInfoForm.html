@@ -1,0 +1,259 @@
+<script type="text/javascript" charset="utf-8">
+    $(function () {
+//     	console.info(parent.loginInfo);
+//     	console.info(parent.loginInfo.pageResource);
+//     	for ( var sIndex in parent.loginInfo.pageResource) {
+// // 			$('#orgInfo_btn_verify').attr('id');
+// 			var sBtnId = parent.loginInfo.pageResource[sIndex].resourceCode;
+// 			var sHtmlName = parent.loginInfo.pageResource[sIndex].superiorId;
+// 			// TODO
+// 			console.info(sHtmlName);
+// 			console.info(sBtnId);
+// 			if(sBtnId){
+// // 				console.info($('#orgInfo_btn_verify'));
+// 				console.info($('#' + sBtnId));
+// //	 			$('#' + sBtnId).css('display',''); 	// 停用按钮
+// //	          var $OrgInfoBtnEdit   = $('#orgInfo_btn_edit'); 	// 修改按钮
+// //	          var $OrgInfoBtnVerify = $('#orgInfo_btn_verify'); 	// 审核按钮
+// 			}
+// 		}
+    	
+    	var $CheckOrgNoBtn = $('#orgInfoForm_checkOrgNo_btn'); // 检测机构编号按钮
+    	var $EditOrgInfoBtn = $('#orgInfo_btn_edit'); // 启用编辑按钮
+    	var $VerifyOrgInfoBtn = $('#orgInfo_btn_verify'); // 启用审核按钮
+    	var $SaveOrgInfoBtn = $('#orgInfo_btn_save'); // 新增保存按钮
+    	var $UpdateOrgInfoBtn = $('#orgInfo_btn_update'); // 编辑保存按钮
+    	var $RemoveOrgInfoBtn = $('#orgInfo_btn_remove'); // 删除按钮
+    	
+    	$RemoveOrgInfoBtn.bind('click', function () {
+			extJQ.messagerConfirm('询问', '您确定要停用当前机构记录？', function(r) {
+				if (r) {
+					var nOrgNo = $('#orginalOrgNo').val();
+					var nIndex = $('#currentOrgInfoIndex').val();
+					var oRemoveCondition = {
+						orgNos : nOrgNo
+					};
+					utils.ajaxPost(staticParam.action_reqPath_main,"removeOrgInfoByIds", oRemoveCondition, 
+							function(o) {
+// 								eOrgInfoDatagrid.datagrid('deleteRow', nIndex);
+								eOrgInfoDatagrid.datagrid('updateRow',{
+									index: nIndex,
+									row: {
+										orgState: staticParam.flag_false
+									}
+								});
+								eOrgInfoDialog.dialog('close');
+							}
+					);
+				}
+			});
+		});
+
+		$EditOrgInfoBtn.bind('click', function() {
+			// 启用检测机构编号按钮、编辑保存按钮、Form内的控件
+			$CheckOrgNoBtn.linkbutton("enable");
+			$UpdateOrgInfoBtn.linkbutton("enable");
+			extUtil.disableForm('orgInfoForm_form', "");
+		});
+
+		$VerifyOrgInfoBtn.bind('click', function() {
+			// 启用编辑保存按钮、Form内审核相关的控件
+			$UpdateOrgInfoBtn.linkbutton("enable");
+			$('#verifyState').combobox("enable");
+			$('#verifyReason').removeAttr("disabled");
+		});
+
+		$SaveOrgInfoBtn.bind('click',function() {
+			var $CheckOrgNoSpan = $('#orgInfoForm_checkOrgNo_span');
+			var $orgInfoFormForm = $("#orgInfoForm_form");
+			var oIsValid/*Form内验证元素的状态*/= $orgInfoFormForm.form('validate');
+			if (!oIsValid) {
+				$.messager.alert("提示", "校验未通过，请检查输入项！");
+				return;
+			}
+			var oCheckFlag = $CheckOrgNoSpan.attr("checkFlag");
+			if (oCheckFlag != "true") {
+				$.messager.alert("提示", "请先进行机构编号合法验证！");
+				return;
+			}
+			var oAddCondition/*序列化表单数据*/= extUtil.serializeObject($orgInfoFormForm.form());
+			oAddCondition.orgAuth = utils.getCheckboxValStr('orgAuth');
+			utils.ajaxPost(staticParam.action_reqPath_main,"insertOrgInfo",oAddCondition,
+				function(o) {
+					eOrgInfoDatagrid.datagrid(
+							"insertRow", {
+								index : 0,
+								row : o.OrgInfo
+							});
+					extJQ.removeDatagridDefaultView('orgInfoManage_datagrid');
+					eOrgInfoDialog.dialog('close');
+				});
+		});
+
+		$UpdateOrgInfoBtn.bind('click', function() {
+			var aRows = eOrgInfoDatagrid.datagrid('getSelections')
+			var $CheckOrgNoSpan = $('#orgInfoForm_checkOrgNo_span');
+			var $orgInfoFormForm = $("#orgInfoForm_form");
+			var oIsValid/*Form内验证元素的状态*/= $orgInfoFormForm.form('validate');
+			if (!oIsValid) {
+				$.messager.alert("提示", "校验未通过，请检查输入项！");
+				return;
+			}
+			var oCheckFlag = $CheckOrgNoSpan.attr("checkFlag");
+			if (oCheckFlag != "true") {
+				$.messager.alert("提示", "请先进行机构编号合法验证！");
+				return;
+			}
+			var oAddCondition/*序列化表单数据*/= extUtil.serializeObject($orgInfoFormForm.form());
+			oAddCondition.orgAuth = utils.getCheckboxValStr('orgAuth');
+			utils.ajaxPost(staticParam.action_reqPath_main,"editOrgInfo",oAddCondition,
+				function(o) {
+					var nIndex = eOrgInfoDatagrid.datagrid('getRowIndex', aRows[0]);
+					eOrgInfoDatagrid.datagrid('updateRow', {
+							index : nIndex,
+							row : o.OrgInfo
+						});
+					eOrgInfoDialog.dialog('close');
+				});
+		});
+
+		$('#orgInfo_btn_cancel').bind('click', function() {
+			eOrgInfoDialog.dialog('close');
+		});
+
+		$('#verifyState').combobox({
+			onSelect: function(record){
+			switch (record.value) {
+				case "0": // 待审核
+// 					$('#verifyReason').val("").attr("disabled","disabled");
+					break;
+				case "1": // 审核通过
+// 					$('#verifyReason').val("").attr("disabled","disabled");
+					break;
+				case "2": // 审核未通过
+					
+					break;
+				}
+			}
+		});
+	});
+</script>
+<div id="orgInfoForm_div" align="center">
+    <form id="orgInfoForm_form" method="post" class="form">
+        <table id="orgInfoForm_table" class="table" style="width: 100%;">
+            <tbody>
+            <tr>
+                <th width="80px"><span style="color: red">*</span>机构代码：</th>
+                <td><input id="orgNo" name="orgNo" type="text"
+                           class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'机构编号为必填项！',validType:['spaceMatch[0]']">&nbsp;&nbsp;
+                    <a id="orgInfoForm_checkOrgNo_btn" href="javascript:void(0);"
+                       class="easyui-linkbutton" data-options="iconCls:'icon-check'">检测</a></td>
+                <td colspan="2"><span id="orgInfoForm_checkOrgNo_span"></span></td>
+            </tr>
+            <tr>
+             	<th><span style="color: red">*</span>机构名称：</th>
+                <td><input name="orgName"
+                           class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'机构名称为必填项！', validType:['spaceMatch[0]']"></td>
+                <td colspan="2"></td>
+            </tr>
+             <tr>
+             	<th><span style="color: red">*</span>机构简称：</th>
+                <td><input name="orgShortName" ></td>
+                <th><span style="color: red">*</span>英文简称：</th>
+                <td><input name="orgShortNameEn" ></td>
+            </tr>
+            <tr>
+                <th><span style="color: red">*</span>机构类型：</th>
+                <td><select id="orgType" name="orgType"
+                            class="easyui-combobox combobox-f combo-f"
+                            data-options="panelHeight:'auto',editable:false"
+                            style="width: 155px; display: none;">
+                    <option value="01">银联</option>
+                    <option value="02">商户</option>
+                    <option value="03">银行</option>
+                </select></td>
+                <th width="80px">机构状态：</th>
+                <td><select id="orgState" name="orgState"
+                            class="easyui-combobox combobox-f combo-f"
+                            data-options="panelHeight:'auto',editable:false"
+                            style="width: 155px; display: none;">
+                    <option value="0">停用</option>
+                    <option value="1">启用</option>
+                </select></td>
+            </tr>
+            <tr>
+                <th><span style="color: red">*</span>交易权限：</th>
+                <td colspan="3">
+                <div id = "orgAuth" >
+	                <input type="checkbox" name="">委托类<input type="checkbox" name="">&nbsp;代&nbsp;&nbsp;收&nbsp;
+	                <input type="checkbox" name="">&nbsp;代&nbsp;&nbsp;付&nbsp;<input type="checkbox" name="">票据打印
+	                <input type="checkbox" name="">账户验证<br>
+	                <input type="checkbox" name="">查&nbsp;&nbsp;询<input type="checkbox" name="">统计分析
+	                <input type="checkbox" name="">差错处理<input type="checkbox" name="">上传下载
+	            </div>
+                </td>
+            </tr>
+            <tr>
+                <th>联系人：</th>
+                <td><input name="orgMnger" class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'联系人为必填项！', validType:['spaceMatch[0]']"></td>
+                <th>联系电话：</th>
+                <td><input name="orgTel" class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'联系电话为必填项！', validType:['spaceMatch[0]']"></td>
+            </tr>
+            <tr>
+                <th>联系地址：</th>
+                <td><input name="orgAddr" class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'联系地址为必填项！', validType:['spaceMatch[0]']"></td>
+                <th>邮政编码：</th>
+                <td><input name="orgZip" class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'邮政编码为必填项！', validType:['spaceMatch[0]']"></td>
+            </tr>
+            <tr>
+                <th><span style="color: red">*</span>交易模式：</th>
+                <td><select id="orgMode" name="orgMode"
+                            class="easyui-combobox combobox-f combo-f"
+                            data-options="panelHeight:'auto',editable:false"
+                            style="width: 155px; display: none;">
+                    <option value="0">非托管</option>
+                    <option value="1">托管</option>
+                </select></td>
+                <th width="80px">计算滞纳金：</th>
+                <td><select id="delayFlag" name="delayFlag"
+                            class="easyui-combobox combobox-f combo-f"
+                            data-options="panelHeight:'auto',editable:false"
+                            style="width: 155px; display: none;">
+                    <option value="0">不计算</option>
+                    <option value="1">计算</option>
+                </select></td>
+            </tr>
+            <tr>
+                <th>审核状态：</th>
+                <td><select id="verifyState" name="verifyState"
+                            class="easyui-combobox combobox-f combo-f"
+                            data-options="panelHeight:'auto',editable:false"
+                            style="width: 155px; display: none;">
+                    <option value="0">待审核</option>
+                    <option value="1">审核通过</option>
+                    <option value="2">审核未通过</option>
+                </select></td>
+                <td colspan="2"></td>
+            </tr>
+             <tr>
+                <th>回退原因：</th>
+                <td colspan="3">
+                	<textarea id='verifyReason' name='verifyReason' rows="3" style="width: 520px"></textarea>
+				</td>
+            </tr>
+            <tr>
+                <td><input id="orginalOrgNo" type="hidden"></td>
+                <td><input id="currentOrgInfoIndex" type="hidden"></td>
+                <td><input name="" type="hidden"></td>
+                <td><input name="" type="hidden"></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>

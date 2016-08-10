@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services>
+
+	<service id="credenceAdd" type="spring" bean-id="credenceService" method="add">
+		<method-arguments>
+			<argument name="arg" type="com.ejx4tut.demo.a1.domain.entity.Credence" expression="input" />
+		</method-arguments>
+	</service>
+
+	<service id="listCredence" type="spring" bean-id="credenceService" method="listCredence">
+		<method-arguments>
+			<argument name="arg" type="com.tienon.web.support.PageGrid" expression="input" />
+		</method-arguments>
+	</service>
+
+	<service id="addCredence" type="spring" bean-id="credenceService" method="addCredence">
+		<method-arguments>
+			<argument name="arg" type="com.ejx4tut.demo.a1.domain.entity.Credence" expression="input" />
+		</method-arguments>
+	</service>
+
+	<service id="updateCredence" type="spring" bean-id="credenceService" method="updateCredence">
+		<method-arguments>
+			<argument name="arg" type="com.ejx4tut.demo.a1.domain.entity.Credence" expression="input" />
+		</method-arguments>
+	</service>
+
+	<service id="removeCredence" type="spring" bean-id="credenceService" method="removeCredence">
+		<method-arguments>
+			<argument name="arg" type="java.util.HashMap" expression="input" />
+		</method-arguments>
+	</service>
+
+</services>

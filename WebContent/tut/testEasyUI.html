@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>角色信息维护</title>
+<script src="../js/commonIframe.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$('#roleManage_roleInfoDatagrid').datagrid({
+			fitColumns:true,
+			striped:true,
+			checkOnSelect:true,
+			toolbar:'#roleManage_roleInfoDatagrid_toolbar',
+			columns:[[
+			{
+				field : 'ck',
+				checkbox : true
+			}, {
+				field : 'roleCode',
+				title : '角色编码',
+				width : 100
+			}, {
+				field : 'roleName',
+				title : '角色名称',
+				width : 100
+			}, {
+				field : 'description',
+				title : '角色描述',
+				width : 100
+			}, {
+				field : 'status',
+				title : '状态',
+				width : 100,
+				formatter : function(value, row, index) {
+					if (value == "0")
+						return "无效";
+					else if (value == "1")
+						return "有效";
+				}
+			} ]]
+		});
+
+		$('#roleManage_roleInfoDatagrid_pagination').pagination({
+			pageList : [ 10, 20, 50, 80 ],
+			onSelectPage : function(pageNumber, pageSize) {
+				var data = {
+					pageGrid : utils.createPageGrid({}, pageNumber, pageSize)
+				};
+				query();
+			},
+		});
+	})
+
+	//角色查询方法
+	function query() {
+		var searchCondition = extUtil.serializeObject($('#roleManage_roleInfoDatagrid_toolbar_searchForm'));
+		// 循环searchCondition，若内key值为“”则置为null
+		for ( var key in searchCondition) {
+			if (searchCondition[key] == "") {
+				searchCondition[key] = null;
+			}
+		}
+		var pageNumber = $('#roleManage_roleInfoDatagrid_pagination').pagination('options').pageNumber;
+		var pageSize = $('#roleManage_roleInfoDatagrid_pagination').pagination('options').pageSize;
+		var pageGrid = utils.createPageGrid(searchCondition, pageNumber, pageSize);
+
+		utils.ajaxPost(staticParam.action_reqPath_main, 'listRoleInfo', pageGrid, 
+				function(data) {
+					var result = data;
+					$('#roleManage_roleInfoDatagrid').datagrid('loadData', result.rows); // 加载Datagrid数据
+					$('#roleManage_roleInfoDatagrid_pagination').pagination('refresh', 
+						{
+							total : result.total
+						});
+				});
+	}
+
+	//清空查询条件
+	function clearSearch() {
+		$('#roleManage_roleInfoDatagrid_toolbar_searchForm input').val('');// 清空文本框
+	}
+
+	function deleteRoles() {
+		var objs = $('#roleManage_roleInfoDatagrid').datagrid('getChecked');
+		var roleCodesss = [];
+		var len = objs.length;
+		if (len != 0) {
+			$.messager.confirm('确认信息', '您确定要删除选中的角色信息吗？', function(btn) {
+				if (btn) {
+					for (var i = 0; i < len; i++) {
+						roleCodesss.push(objs[i].roleCode);
+					}
+					var aReqData = {
+						roleCodes : roleCodesss.join(',')
+					};
+					utils.ajaxPost(staticParam.action_reqPath_main,'removeRoleInfo', aReqData, 
+							function(o) {
+								query();
+							});
+				}
+			});
+		} else {
+			$.messager.alert("提示", "请先选择要删除的角色信息！", 'warning');
+		}
+	}
+
+	//获取所有功能菜单信息
+	function getResources(type) {
+		var searchCondition = {};
+		searchCondition['roleCode'] = $('#roleManage_roleInfoDatagrid').datagrid('getChecked')[0].roleCode;
+		var pageNumber = $('#role_resource_bindInfoDatagrid_pagination').pagination('options').pageNumber;
+		var pageSize = $('#role_resource_bindInfoDatagrid_pagination').pagination('options').pageSize;
+		var pageGrid = utils.createPageGrid(searchCondition, pageNumber, pageSize);
+		var serviceId = "";
+		if (type == '1') {
+			serviceId = 'listFuncUrls';
+		} else if (type == '2') {
+			serviceId = 'listServices';
+		}
+
+		utils.ajaxPost(staticParam.action_reqPath_main, serviceId, pageGrid,
+			function(o) {
+				$('#role_resource_bindDatagrid').datagrid('loadData', o.rows); // 加载Datagrid数据
+				$('#role_resource_bindInfoDatagrid_pagination').pagination(
+						'refresh', {
+							total : o.total
+						});
+			});
+	}
+
+	//页面资源绑定
+	function openBindResourceWin(type) {
+		var row = $('#roleManage_roleInfoDatagrid').datagrid('getChecked');
+		if (row.length != 1) {
+			parent.extJQ.messagerAlert('提示', '请勾选一个需要操作的记录！', 'error');
+			return;
+		}
+		roleResourceDialog = extJQ.dialog({
+			title : '角色资源绑定',
+			href : 'roleBindResource.html',
+			width : 800,
+			height : 420,
+			buttons : [
+					{
+						text : '保存',
+						iconCls : 'icon-add',
+						handler : function() {
+							var addCondition = {};
+							addCondition['roleCode'] = $('#role_resource_bind_form #roleCode').val();
+							var checkedNodes = $("#role_resource_bindDatagrid").datagrid('getChecked');
+							var nodeIds = "";
+							for (var i = 0; i < checkedNodes.length; i++) {
+								nodeIds = (nodeIds == "") ? checkedNodes[i].id : nodeIds + "," + checkedNodes[i].id;
+							}
+
+							var resourceType = "";
+							if (type == 1)
+								resourceType = '0';
+							else if (type == 2)
+								resourceType = '1';
+
+							addCondition['resourceType'] = resourceType;
+							addCondition['resourceIds'] = nodeIds;
+							utils.ajaxPost( staticParam.action_reqPath_main, 'bindResourceForRole', addCondition, 
+									function(o) {
+										roleResourceDialog.dialog('close');
+									});
+						}
+					}, {
+						text : '关闭',
+						iconCls : 'icon-cancel',
+						handler : function() {
+							roleResourceDialog.dialog('close');
+						}
+					} ],
+			onLoad : function() {
+				$('#role_resource_bind_form').form('load', row[0]);
+				if (type == '1') {
+// 					drowRolePageResourceGrid();
+					drawPlugin.rolePageResBindDatagrid('role_resource_bindDatagrid', 'role_resource_bindDatagrid_toolbar');
+					$("#role_resource_sub_bindDatagrid").datagrid({
+						fitColumns : true,
+						striped : true,
+						columns : [ [ {
+							field : 'ck',
+							checkbox : true
+						}, {
+							field : 'functionUrl',
+							title : '全选',
+							width : 100
+						} ] ]
+					});
+				} else if (type == '2') {
+// 					drowRoleServiceResourceGrid();
+					drawPlugin.roleServiceResBindDatagrid('role_resource_bindDatagrid', 'role_resource_bindDatagrid_toolbar');
+					$('#role_reource_body').layout('remove', 'east');
+				}
+				$('#role_resource_bindInfoDatagrid_pagination').pagination({
+					pageList : [ 10, 20, 50 ], //20,50,80
+					onSelectPage : function(pageNumber, pageSize) {
+						var data = {
+							pageGrid : utils.createPageGrid({}, pageNumber, pageSize)
+						};
+						getResources(type);
+					},
+				});
+				getResources(type);
+			}
+		})
+	}
+
+	// 	function getReourceTree(){
+	// 		$.post(staticParam.action_reqPath_main, {
+	// 			_sid : 'listMainMenu',
+	// 			json : '',
+	// 		}, function(data) {
+	// 			var res = extUtil.str2Json(data);
+	// 			$('#role_resource_ctrlTree').tree('loadData', res.obj.menu);
+	// 		});
+	// 	}
+
+	function openWin() {
+		addRoleDialog = extJQ.dialog({
+			title : '新增角色信息',
+			href : 'roleEdit.html',
+			width : 400,
+			height : 220,
+			buttons : [
+					{
+						text : '保存',
+						iconCls : 'icon-add',
+						handler : function() {
+							var isValid = $("#roleEdit_form").form('validate');
+							if (!isValid) {
+								$.messager.alert("提示", "校验未通过，请检查输入项！",'warning');
+								return;
+							}
+							var addCondition = extUtil.serializeObject($('#roleEdit_form').form());
+
+							utils.ajaxPost(staticParam.action_reqPath_main,'addRoleInfo', addCondition, 
+									function(o) {
+										$('#roleManage_roleInfoDatagrid').datagrid("insertRow", {
+													index : 0,
+													row : o.role
+												});
+										addRoleDialog.dialog('close');
+									});
+						}
+					}, {
+						text : '关闭',
+						iconCls : 'icon-cancel',
+						handler : function() {
+							addRoleDialog.dialog('close');
+						}
+					} ]
+		})
+	};
+
+	function openUWin() {
+		var row = $('#roleManage_roleInfoDatagrid').datagrid('getChecked');
+		if (row.length != 1) {
+			parent.extJQ.messagerAlert('提示', '请勾选一个需要编辑的记录！', 'error');
+			return;
+		}
+		updateRoleDialog = extJQ.dialog({
+			title : '修改角色信息',
+			href : 'roleEdit.html',
+			width : 400,
+			height : 220,
+			buttons : [
+					{
+						text : '保存',
+						iconCls : 'icon-add',
+						handler : function() {
+							var isValid = $("#roleEdit_form").form('validate');
+							if (!isValid) {
+								$.messager.alert("提示", "校验未通过，请检查输入项！",
+										'warning');
+								return;
+							}
+							var addCondition = extUtil.serializeObject($(
+									'#roleEdit_form').form());
+							addCondition['roleCode'] = row[0].roleCode;
+
+							utils.ajaxPost(staticParam.action_reqPath_main,'updateRoleInfo', addCondition,
+									function(o) {
+										updateRoleDialog.dialog('close');
+										query();
+									});
+						}
+					}, {
+						text : '关闭',
+						iconCls : 'icon-cancel',
+						handler : function() {
+							updateRoleDialog.dialog('close');
+						}
+					} ],
+			onLoad : function() {
+				$('#roleEdit_form').form('load', row[0]);
+				$('#roleCode').attr('readonly','readonly');
+			}
+		})
+	}
+</script>
+</head>
+<body id="roleManage_layout_div" class="easyui-layout"  data-options="fit:true,border:false">
+	<div id="roleManage_roleInfoDatagrid_toolbar">
+		<table>
+			<tr>
+				<td>
+					<form id="roleManage_roleInfoDatagrid_toolbar_searchForm">
+						<table>
+							<tr>
+								<td>角色编码：</td>
+								<td><input name="roleCode" style="width: 80px;" /></td>
+								<td>角色名称：</td>
+								<td><input name="roleName" style="width: 80px;" /></td>
+								<td>
+									<a id="roleManage_toolbar_search" href="javascript:void(0);" onclick="query();" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">查询</a>
+									<div class="datagrid-btn-separator"></div>
+	                				<a id="roleManage_toolbar_cleanSearch" href="javascript:void(0);" onclick="clearSearch();" class="easyui-linkbutton" data-options="iconCls:'icon-reload',plain:true">清空</a>
+								</td>
+							</tr>
+						</table>
+					</form>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table>
+						<tr>
+							<td><a id="roleManage_toolbar_addRole" href="javascript:void(0);" onclick="openWin();" class="easyui-linkbutton" data-options="iconCls:'icon-role-add',plain:true">新增角色</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+				            <td><a id="roleManage_toolbar_updateRole" href="javascript:void(0);" onclick="openUWin();" class="easyui-linkbutton" data-options="iconCls:'icon-role-edit',plain:true">修改角色</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+				            <td><a id="roleManage_toolbar_deleteRole" href="javascript:void(0);" onclick="deleteRoles();" class="easyui-linkbutton" data-options="iconCls:'icon-role-delete',plain:true">删除角色</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+							<td><a id="roleManage_toolbar_bindResource" href="javascript:void(0);" onclick="openBindResourceWin('1');" class="easyui-linkbutton" data-options="iconCls:'icon-resource-page',plain:true">页面资源</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+							<td><a id="roleManage_toolbar_bindResource_service" href="javascript:void(0);" onclick="openBindResourceWin('2');" class="easyui-linkbutton" data-options="iconCls:'icon-resource-service',plain:true">服务资源</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<div id="roleManage_layout_center"
+         data-options="region:'center',border:false" style="overflow: hidden;">
+        <table id="roleManage_roleInfoDatagrid"></table>
+    </div>
+    
+    <div id="roleManage_layout_south"
+         data-options="region:'south',border:false"
+         style="overflow: hidden; height: 30px">
+        <div id="roleManage_roleInfoDatagrid_pagination"
+             style="background: #efefef; border: 1px solid #ccc;"></div>
+    </div>
+</body>
+</html>

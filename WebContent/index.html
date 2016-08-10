@@ -1,0 +1,36 @@
+<!DOCTYPE HTML >
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Ejx4web</title>
+<script type="text/javascript">
+</script>
+</head>
+<body id="index_layout_body" class="easyui-layout">
+
+	<div id="index_layout_north_div"
+		data-options="region:'north', href:'pages/layout/north.html'"
+		style="height: 65px; overflow: hidden; background: url('images/logo.png') no-repeat;"></div>
+	<div id="index_layout_west_div"
+		data-options="region:'west', href:'pages/layout/west.html',title:'系统功能导航'"
+		style="width: 150px; overflow: hidden;"></div>
+	<div id="index_layout_center_div"
+		data-options="region:'center',href:'pages/layout/center.html', border:false"
+		style="overflow: hidden;"></div>
+	<div id="index_layout_south_div"
+		data-options="region:'south', href:'pages/layout/south.html'"
+		style="height: 28px; overflow: hidden;"></div>
+
+	<script src="js/common.js"></script>
+
+	<script type="text/javascript">
+		var loginInfo; // 全局用户登入信息
+		var facade;
+		$(document).ready(function() {
+			//START THE APPLICATION
+			new ejx4ui.Application();
+			facade = puremvc.Facade.getInstance(ejx4ui.AppConstants.CORE_NAME);
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<script type="text/javascript" charset="utf-8">
+	$(function () {
+	    parent.facade.removeMediator(ejx4ui.view.mediator.UserManageMediator.NAME);
+	    parent.facade.registerMediator(new ejx4ui.view.mediator.UserManageMediator());
+	});
+</script>
+<div id="userManage_layout_div" class="easyui-layout" data-options="fit:true,border:false">
+<div id="userManage_userInfoDatagrid_toolbar" style="display: none;">
+		<table>
+			<tr>
+				<td>
+					<form id="userManage_userInfoDatagrid_toolbar_searchForm">
+						<table>
+							<tr>
+								<td>登录名</td>
+								<td><input name="userName" style="width: 80px;" /></td>
+								<td>姓名</td>
+								<td><input name="fullName" style="width: 80px;" /></td>
+								<td>性别</td>
+								<td><select name="sex" class="easyui-combobox" data-options="panelHeight:'auto',editable:false">
+										<option value="">请选择</option>
+										<option value="02">男</option>
+										<option value="03">女</option>
+										<option value="01">未指定</option>
+									</select>
+								</td>
+<!-- 								<td>创建时间</td> -->
+<!-- 								<td><input name="QUERY_t#createdatetime_D_GE" class="Wdate" onclick="WdatePicker({readOnly:true,dateFmt:'yyyy-MM-dd HH:mm:ss'})" readonly="readonly" style="width: 120px;" />-<input name="QUERY_t#createdatetime_D_LE" class="Wdate" onclick="WdatePicker({readOnly:true,dateFmt:'yyyy-MM-dd HH:mm:ss'})" readonly="readonly" style="width: 120px;" /></td> -->
+								<td>
+									<a id="userManage_toolbar_search" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">查询</a>
+									<div class="datagrid-btn-separator"></div>
+	                				<a id="userManage_toolbar_cleanSearch" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-reload',plain:true">重置查询</a>
+								</td>
+							</tr>
+						</table>
+					</form>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table>
+						<tr>
+							<td><div class="datagrid-btn-separator"></div></td>
+							<td><a id="userManage_toolbar_addUser" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-user-add',plain:true">新增用户</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+				            <td><a id="userManage_toolbar_updateUser" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-user-edit',plain:true">修改用户</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+				            <td><a id="userManage_toolbar_deleteUser" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-user-delete',plain:true">删除用户</a></td>
+							<td><div class="datagrid-btn-separator"></div></td>
+<!-- 							<td><a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'ext-icon-table_add',plain:true" onclick="">导入</a></td> -->
+<!-- 							<td><a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'ext-icon-table_go',plain:true" onclick="">导出</a></td> -->
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<div id="userManage_layout_center"
+         data-options="region:'center',border:false" style="overflow: hidden;">
+        <table id="userManage_userInfoDatagrid"></table>
+    </div>
+    
+    <div id="userManage_layout_south"
+         data-options="region:'south',border:false"
+         style="overflow: hidden; height: 30px">
+        <div id="userManage_userInfoDatagrid_pagination"
+             style="background: #efefef; border: 1px solid #ccc;"></div>
+    </div>
+</div>

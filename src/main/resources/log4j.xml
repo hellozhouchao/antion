@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+<!-- 
+	<appender name="ErrorLog"
+		class="com.ccb.openframework.log.impl.DailyRollingBySizeFileAppender">
+		<param name="Encoding" value="UTF-8" />
+		<param name="Threshold" value="error" />
+		<param name="file" value="C://temp//ncbs_err_408001.log" />
+		<param name="BufferedIO" value="false" />
+		<param name="MaxFileSize" value="50MB" />
+		<param name="MaxBackupIndex" value="10" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[EJX][%l][%d{yyyy-MM-dd HH:mm:ss SSS}][%-5p][EvtTraceId=%X{['_evt_trace_id']}][transactionCode=%X{['_service_id']}][transactionId=%X{['_seq_no']}][userMessage=%m]%n" />
+		</layout>
+	</appender>
+
+	<appender name="AppLog"
+		class="com.ccb.openframework.log.impl.DailyRollingBySizeFileAppender">
+		<param name="BufferedIO" value="false" />
+		<param name="Encoding" value="UTF-8" />
+		<param name="file" value="C://temp//ncbs_out_408001.log" />
+		<param name="MaxFileSize" value="50MB" />
+		<param name="MaxBackupIndex" value="10" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[EJX][%l][%d{yyyy-MM-dd HH:mm:ss SSS}][%-5p][EvtTraceId=%X{['_evt_trace_id']}][transactionCode=%X{['_service_id']}][transactionId=%X{['_seq_no']}][userMessage=%m]%n" />
+		</layout>
+	</appender>
+ -->
+	<appender name="OutConsoleLog" class="org.apache.log4j.ConsoleAppender">
+		<param name="target" value="System.out" />
+		<param name="Encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[EJX]%m \t\t|| [%l][%d{yyyy-MM-dd HH:mm:ss SSS}][%-5p]%n" />
+		</layout>
+	</appender>
+
+	<appender name="ErrConsoleLog" class="org.apache.log4j.ConsoleAppender">
+		<param name="Threshold" value="error" />
+		<param name="target" value="System.err" />
+		<param name="Encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[EJX-WARN]%m \t\t|| [%l][%d{yyyy-MM-dd HH:mm:ss SSS}][%-5p]%n" />
+		</layout>
+	</appender>
+
+<!-- 
+	<logger name="org.quartz">
+		<level value="error" />
+		<appender-ref ref="ErrorLog" />
+	</logger>
+	
+	<logger name="org.apache.zookeeper">
+		<level value="error" />
+		<appender-ref ref="ErrorLog" />
+	</logger>
+ -->
+	<root>
+		<priority value="DEBUG">
+		</priority>
+		<!-- 
+		<appender-ref ref="ErrorLog" />
+		<appender-ref ref="AppLog" />
+		 -->
+		<appender-ref ref="ErrConsoleLog" />
+		<appender-ref ref="OutConsoleLog" />
+	</root>
+
+</log4j:configuration>

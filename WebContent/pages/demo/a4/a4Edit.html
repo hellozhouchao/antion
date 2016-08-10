@@ -1,0 +1,32 @@
+<div id="edit_div" align="center">
+    <form id="a4_edit_form" method="post" class="form" style="margin-top: 5px">
+        <table id="edit_table" class="table" style="width: 98%;">
+            <tbody>
+            <tr>
+    			<th><span style="color: red">*</span>用户ID:</th>
+    			<td><input id="userId" name="userId" 
+ 						   class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'角色编号不能为空！', validType:['spaceMatch[0]']"></td>
+    		</tr>
+            <tr>
+                <th><span style="color: red">*</span>认证方式:</th>
+                <td><input name="authTypeCode"
+                           class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'角色名称不能为空！', validType:['spaceMatch[0]']"></td>
+            </tr>
+            <tr>
+                <th><span style="color: red">*</span>凭证有效期:</th>
+                <td><input name="credenceExp"
+                           class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'角色名称不能为空！'"></td>
+            </tr>
+            <tr>
+                <th>备注:</th>
+                <td><input name="remark"
+                           class="easyui-validatebox"
+                           data-options="validType:['spaceMatch[0]']"></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>

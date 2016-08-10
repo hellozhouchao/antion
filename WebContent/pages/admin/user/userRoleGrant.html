@@ -1,0 +1,158 @@
+<script type="text/javascript" charset="utf-8">
+    var eUserRoleGrantDatagrid;
+    var eUserRoleGrantSubDatagrid;
+    var $UserRoleGrantDatagrid = $('#userRoleGrant_datagrid');
+    var $UserRoleGrantSubDatagrid = $('#userRoleGrant_sub_datagrid');
+    /**
+     * 子窗口移除
+     */
+     function fRemoveUserRole(){
+         var aSelectRows = eUserRoleGrantSubDatagrid.datagrid("getChecked");
+         if (aSelectRows.length > 0) {
+         	extJQ.messagerConfirm('询问', '您确定要移除所选的该用户角色？', function (r) {
+         		if(r){
+ 		        	utils.userRoleSubDatagridDeleteRow('userRoleGrant_datagrid', 'userRoleGrant_sub_datagrid', aSelectRows);
+         		}
+         	});
+         } else {
+             $.messager.alert("提示", "请勾选要该用户需要被移除的角色！");
+         }
+    }
+    
+    $(function () {
+        eUserRoleGrantDatagrid = $UserRoleGrantDatagrid.datagrid({
+        	title: '系统角色列表',
+            striped: true,
+            checkOnSelect : true,
+            fit: true,
+            idField: 'userId',
+            view: extEU.defaultView,
+            columns: [
+                [
+                    {
+				    width: '20',
+				    field: 'checkBox',
+				    checkbox: true
+					},
+					{
+                        width: '100',
+                        title: '角色编号',
+                        field: 'roleCode',
+                        sortable: true
+                    },
+                    {
+                        width: '100',
+                        title: '角色名称',
+                        field: 'roleName',
+                        sortable: true
+                    },
+                    {
+                        width: '120',
+                        title: '角色备注',
+                        field: 'description',
+                        sortable: true
+                    }
+                ]],
+                onSelect: function(rowIndex, rowData){
+//                 	delete rowData.description;
+                	extJQ.datagridInsertRow('userRoleGrant_sub_datagrid', rowData);
+                	extJQ.removeDatagridDefaultView('userRoleGrant_sub_datagrid');
+                },
+                onUnselect: function(rowIndex, rowData){
+//                 	delete rowData.description;
+                	extJQ.datagridDeleteRow('userRoleGrant_sub_datagrid', rowData);
+                },
+                onBeforeLoad : function (param) {
+		            parent.$.messager.progress({
+		                text: '数据加载中....'
+		            });
+		        },
+		        onLoadSuccess: function (data) {
+                    parent.$.messager.progress('close');
+		        }
+    });
+
+    eUserRoleGrantSubDatagrid = $UserRoleGrantSubDatagrid.datagrid({
+    	title: '编辑用户角色列表',
+        striped: true,
+        fit: true,
+        checkOnSelect : true,
+        idField: 'roleCode',
+        view: extEU.defaultView,
+        columns: [
+            [
+				{
+				    width: '20',
+				    field: 'checkBox',
+				    checkbox: true
+				},
+                {
+                    width: '100',
+                    title: '角色编号',
+                    field: 'roleCode',
+                    sortable: true
+                },
+                {
+                    width: '100',
+                    title: '角色名称',
+                    field: 'roleName',
+                    sortable: true
+                }
+            ]],
+            toolbar : '#userRoleGrant_sub_toolbar',
+            onBeforeLoad : function (param) {
+		        parent.$.messager.progress({
+		            text: '数据加载中....'
+		        });
+		    },
+		    onLoadSuccess: function (data) {
+                // 选中已经被选的记录
+                eUserRoleGrantDatagrid.datagrid('clearSelections');
+               	var oData = eUserRoleGrantDatagrid.datagrid('getRows');
+                if (data) {
+                    extJQ.foreach(oData, function (i) {
+                        $(data.rows).each(function (index, d) {
+                            if (d.roleCode == i.roleCode) {
+                        		var nIndex = eUserRoleGrantDatagrid.datagrid("getRowIndex", i);
+                            	eUserRoleGrantDatagrid.datagrid('checkRow', nIndex);
+                            }
+                        });
+                    });
+                }
+		        parent.$.messager.progress('close');
+		    }
+		    });
+    });
+    
+</script>
+<div id="userRoleGrant_layout" class="easyui-layout" data-options="fit:true">
+
+    <div id="userRoleGrant_layout_center" data-options="region:'center',border:false" style="overflow: hidden;">
+        <table id="userRoleGrant_datagrid"></table>
+    </div>
+
+    <div id="userRoleGrant_layout_east" data-options="region:'east',border:false" style="overflow: hidden; width: 250px">
+        <table id="userRoleGrant_sub_datagrid"></table>
+    </div>
+
+    <div id="userRoleGrant_sub_toolbar" style="padding: 0px; height: auto">
+    	<form id="userRoleGarant_sub_toolbar_form">
+    		<table id="userRoleGarant_sub_toolbar_table" style="width: 100%;">
+	            <tbody>
+		            <tr>
+		            	<th>用户编号:</th>
+		            	<td><input id="userId" name="userId" type="text" disabled="disabled" style="width:100px;"/></td>
+		            </tr>
+		            <tr>
+		            	<th>用户姓名:</th>
+		            	<td><input id="userName" name="userName" type="text" disabled="disabled" style="width:100px;"/></td>
+		            </tr>
+	            </tbody>
+            </table>
+    	</form>
+    	<span id="userId"></span>
+        <a id="userRoleGrant_sub_toolbar_btn_remove" href="javascript:void(0);"
+           class="easyui-linkbutton"
+           data-options="iconCls:'icon-role-delete',plain:true" onclick="fRemoveUserRole();">移除角色</a> &nbsp;
+    </div>
+</div>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script src="jquery.min.js">
+	
+</script>
+<script>
+	function json2str(o) {
+		var arr = [];
+		var fmt = function(s) {
+			if (typeof s == 'object' && s != null)
+				return json2str(s);
+			return /^(string|number)$/.test(typeof s) ? "'" + s + "'" : s;
+		}
+		for ( var i in o)
+			arr.push("'" + i + "':" + fmt(o[i]));
+		return '{' + arr.join(',') + '}';
+	}
+	function str2Json(stringValue) {
+		eval("var theJsonValue = " + stringValue);
+		return theJsonValue;
+	}
+
+	function myFunction() {
+		$("#result").html("Hello jQuery")
+
+		var jsonRequest = {
+			title : 'Json请求数据',
+			age : '100',
+			sex : '男',
+			artist : '贝多芬',
+			price : '10.23',
+			year : '2012',
+			country : 'CN'
+		};
+
+		$("#testAjaxJSON").click(function(event) {
+// 			$.post('ajax/secapptest.action', {
+// 				'_fw_service_id' : 'testService_update',
+// 				'jsonData' : json2str(jsonRequest),
+// 				'jsonClass' : 'java.util.HashMap'
+// 			}, function(data) {
+// 				var tval = str2Json(data);
+// 				// 					alert(tval.title);
+// 				// 					alert("result:" + data);
+// 				$('#result').html(data);
+
+// 				console.log(tval);
+// 				console.log(json2str(tval));
+// 			});
+			$.ajax({
+				processData: true,
+				url: '/ejx4frameworkdemo/internalService?_sid=testIt', 
+				data: json2str(jsonRequest), 
+				success: function(data) {
+					var tval = str2Json(data);
+					// 					alert(tval.title);
+					// 					alert("result:" + data);
+					$('#result').html(data);
+					console.log(tval);
+					console.log(json2str(tval));
+				}
+			});
+		});
+
+	}
+	$(document).ready(myFunction);
+</script>
+</head>
+
+<body>
+<h1>测试说明</h1>
+<p>
+demo
+</p>
+	<h1>The Result</h1>
+	<p id="result"></p>
+	<button id="testAjaxJSON" type="button">Click Me! TEST !!!</button>
+</body>
+</html>

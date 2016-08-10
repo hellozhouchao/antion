@@ -1,0 +1,42 @@
+<div id="roleEdit_div" align="center">
+    <form id="roleEdit_form" method="post" class="form" style="margin-top: 5px">
+        <table id="roleEdit_table" class="table" style="width: 98%;">
+            <tbody>
+            <tr>
+    			<th><span style="color: red">*</span>角色编号:</th>
+    			<td><input id="roleCode" name="roleCode" 
+ 						   class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'角色编号不能为空！', validType:['spaceMatch[0]']"></td>
+    		</tr>
+            <tr>
+                <th><span style="color: red">*</span>角色名称:</th>
+                <td><input name="roleName"
+                           class="easyui-validatebox"
+                           data-options="required:true, missingMessage:'角色名称不能为空！', validType:['spaceMatch[0]']"></td>
+            </tr>
+            <tr>
+            	<th>角色状态:</th>
+                <td><select id="status" name="status"
+                            class="easyui-combobox combobox-f combo-f"
+                            data-options="panelHeight:'auto',editable:false"
+                            style="width: 155px; display: none;">
+                    <option selected="selected" value="1">有效</option>
+                    <option value="0">无效</option>
+                </select></td>
+            </tr>
+            <tr>
+                <th>子系统标识:</th>
+                <td><input name="subSys"
+                           class="easyui-validatebox"
+                           data-options="validType:['spaceMatch[0]']"></td>
+            </tr>
+            <tr>
+                <th>角色描述:</th>
+                <td><input name="description"
+                           class="easyui-validatebox"
+                           data-options="validType:['spaceMatch[0]']"></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
